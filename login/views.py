@@ -5,11 +5,25 @@ from django.contrib.auth.models import User
 from .models import Usuarios
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+
+
 
 @api_view(['POST'])
 def login_view(request):
-    return 3
-
+    print(request.data)
+    user=get_object_or_404(Usuarios,email=request.data['email'])
+    print(user)
+    print(request.data['password'])
+    valid= user.check_password(request.data['password'])
+    #valid=user.password==request.data['password']
+    print(valid)
+    if not valid:
+        return Response({"error": "Invalid Password"}, status=status.HTTP_401_UNAUTHORIZED)
+    token, created = Token.objects.get_or_create(user=user)
+    serializer = UserSerializer(instance=user)
+    print(serializer.data)
+    return Response({"token":token.key,"user": serializer.data},status.HTTP_200_OK)
 
 @api_view(['POST'])
 def register_view(request):
@@ -17,8 +31,8 @@ def register_view(request):
     if serializer.is_valid():
         serializer.save()
         user = Usuarios.objects.get(email=serializer.data['email'])
+        user.set_password(request.data['password'])
         user.save()
-
         token = Token.objects.create(user=user)
         return Response({'token':token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
 
