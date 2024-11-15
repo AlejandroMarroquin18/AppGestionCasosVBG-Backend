@@ -1,60 +1,59 @@
-from django.shortcuts import render
-from django.contrib.auth import authenticate
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import UserSerializer
+from django.contrib.auth.models import User
+from .models import Usuarios
+from rest_framework.authtoken.models import Token
+from rest_framework import status
 
-# Create your views here.
-
-
-@csrf_exempt  # Exime de la verificación de CSRF (para pruebas, no en producción)
+@api_view(['POST'])
 def login_view(request):
-    if request.method == "POST":
-        try:
-            # Parsear el JSON recibido
-            data = json.loads(request.body)
-            requestemail = data.get("email")
-            requestpassword = data.get("password")
-            
-            # Autenticar al usuario
-            user = authenticate(request, username=requestemail, password=requestpassword)
-            
-            if user is not None:
-                # El usuario es válido
-                return JsonResponse({"status": "success", "message": "Usuario autenticado correctamente"})
-            else:
-                # Usuario o contraseña incorrectos
-                return JsonResponse({"status": "error", "message": "Credenciales incorrectas"}, status=401)
-        
-        except json.JSONDecodeError:
-            # Error en el JSON recibido
-            return JsonResponse({"status": "error", "message": "JSON inválido"}, status=400)
-
-    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+    return 3
 
 
-@csrf_exempt  # Solo usar para desarrollo; considera seguridad para producción
-def registro_api(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            email = data.get("email")
-            password = data.get("password")
+@api_view(['POST'])
+def register_view(request):
+    serializer=UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        user = Usuarios.objects.get(email=serializer.data['email'])
+        user.save()
 
-            # Verificar que todos los campos estén presentes
-            if  not email or not password:
-                return JsonResponse({"error": "Faltan campos requeridos"}, status=400)
+        token = Token.objects.create(user=user)
+        return Response({'token':token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
 
-            
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-            user = User.objects.create(
-                username=username,
-                email=email,
-                password=make_password(password)  # Hashea la contraseña
-            )
 
-            return JsonResponse({"message": "Usuario creado exitosamente"}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "JSON inválido"}, status=400)
+
+
+
+
+
+
+
+
+
+
+'''from django.contrib.auth import login
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from login.authentication import EmailAuthBackend  # Importa tu backend
+
+
+
+@csrf_exempt
+@api_view(['POST'])
+def login_view(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    
+    # Usa tu backend personalizado para autenticar
+    user = EmailAuthBackend().authenticate(request, email=email, password=password)
+    
+    if user is not None:
+        login(request, user)
+        return JsonResponse({"message": "Login exitoso"}, status=200)
     else:
-        return JsonResponse({"error": "Método no permitido"}, status=405)
+        return JsonResponse({"error": "Credenciales inválidas"}, status=400)'''

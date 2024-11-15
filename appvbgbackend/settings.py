@@ -28,6 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+SUPABASE_URL = 'https://naciauidhigojlrqvvrr.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY2lhdWlkaGlnb2pscnF2dnJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTk1MjYsImV4cCI6MjA0NTg3NTUyNn0.IsLUFzNGtX18tc8PS22cfBQKRAcp7sGnVgwofLTUvtY'
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,8 +41,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'login',
     'corsheaders',
 ]
+
+'''AUTHENTICATION_BACKENDS = [
+    'login.authentication.EmailAuthBackend',  # Ruta al backend personalizado  # Backend de Django
+]'''
+
+AUTH_USER_MODEL = 'login.Usuarios'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -85,12 +104,13 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.naciauidhigojlrqvvrr',
-        'PASSWORD': '',  # Reemplaza con tu contraseña real
-        'HOST': 'aws-0-us-east-1.pooler.supabase.com',
-        'PORT': '6543',
+        'NAME': 'vbgdb',  # Nombre de tu base de datos
+        'USER': 'Dani',                  # Usuario de PostgreSQL
+        'PASSWORD': 'invitado',           # Contraseña del usuario
+        'HOST': 'localhost',                  # Si está en el mismo equipo
+        'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }
+    
 }
 
 
