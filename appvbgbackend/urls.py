@@ -21,5 +21,9 @@ from login import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/login/", views.login_view, name="login_view"),
-    path("api/register/", views.register_view, name="register_view")
+    path("api/register/", views.register_view, name="register_view"),
+    path("api/forgottenPassword/", views.forgottenPassword_view, name="forgottenPassword_view"),
+    path("api/validateForgottenPasswordCode/",views.confirmForgottenPasswordCode_view,name="ConfirmForgottenPasswordCode_view"),
+    path("api/changeForgottenPassword/",views.changeForgottenPassword_view,name="changeForgottenPassword_view"),
+
 ]
