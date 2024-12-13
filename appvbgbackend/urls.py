@@ -25,5 +25,6 @@ urlpatterns = [
     path("api/forgottenPassword/", views.forgottenPassword_view, name="forgottenPassword_view"),
     path("api/validateForgottenPasswordCode/",views.confirmForgottenPasswordCode_view,name="ConfirmForgottenPasswordCode_view"),
     path("api/changeForgottenPassword/",views.changeForgottenPassword_view,name="changeForgottenPassword_view"),
+    path("api/auth/google/",views.googleAuth,name="googleAuth_view")
 
 ]

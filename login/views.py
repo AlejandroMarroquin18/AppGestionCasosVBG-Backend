@@ -7,7 +7,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-
+from google.auth.transport import requests
+from google.oauth2 import id_token
 
 
 @api_view(['POST'])
@@ -26,6 +27,9 @@ def login_view(request):
 def register_view(request):
     
     serializer=UserSerializer(data=request.data)
+
+    if not request.data.get['password']:
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
     if serializer.is_valid():
         serializer.save()
@@ -111,3 +115,40 @@ def changeForgottenPassword_view(request):
     else:
         return Response({'status':'error','message':'El token no concuerda con el generado'},status=status.HTTP_401_UNAUTHORIZED)
     
+
+@api_view(['POST'])
+def googleAuth(request):
+    token=request.data.get('token')
+    credential = token.get('credential')
+    try:
+            # Verificar el token usando la librería google-auth
+            idinfo = id_token.verify_oauth2_token(credential, requests.Request(), "588252644218-dt51gh548k7gtkkt7vr9o0srms640333.apps.googleusercontent.com")
+
+            # Obtener información del usuario desde el token
+            email = idinfo.get('email')
+            name = idinfo.get('name')
+
+            if not email:
+                return Response({"error": "No se pudo verificar el correo electrónico."}, status=status.HTTP_400_BAD_REQUEST)
+
+            data={'email': email,'nombre':name,'rol':'developer','username':name,'telefono':'000000'}
+            # Verificar si el usuario ya existe
+            user, created = Usuarios.objects.get_or_create(email=email, defaults=data)
+
+            # Opcional: Actualizar el nombre si cambió
+            if not created and user.nombre != name:
+                user.nombre = name
+                user.save()
+
+            # Generar un token de autenticación para el usuario
+            
+            token, _ = Token.objects.get_or_create(user=user)
+
+            return Response({"token":token.key,"user": {"email": user.email,"nombre": user.nombre,},"is_new_user": created},status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        return Response({"error": "Token inválido o caducado.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    
+
