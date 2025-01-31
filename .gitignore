@@ -2,3 +2,6 @@
 /appvbgbackend/__pycache__/
 /login/__pycache__/
 /login/migrations/__pycache__/
+/appvbgbackend/Scripts/
+/appvbgbackend/Lib/
+/appvbgbackend/pyvenv.cfg

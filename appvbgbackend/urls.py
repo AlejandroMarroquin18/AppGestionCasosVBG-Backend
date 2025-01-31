@@ -17,12 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from django.urls import path,include
-from login.views import QuejaViewSet
+##from login.views import QuejaViewSet
 from login import views
-
+from rest_framework.routers import DefaultRouter
+from quejas.views import QuejaViewSet
 
 router = DefaultRouter()
-router.register(r'quejas', QuejaViewSet)  # Esto genera las rutas automáticamente
+router.register(r'quejas', QuejaViewSet)
+
 
 
 urlpatterns = [
@@ -30,11 +32,9 @@ urlpatterns = [
     path("api/login/", views.login_view, name="login_view"),
     path("api/register/", views.register_view, name="register_view"),
     path("api/forgottenPassword/", views.forgottenPassword_view, name="forgottenPassword_view"),
-    path("api/validateForgottenPasswordCode/",views.confirmForgottenPasswordCode_view,name="ConfirmForgottenPasswordCode_view"),
-    path("api/changeForgottenPassword/",views.changeForgottenPassword_view,name="changeForgottenPassword_view"),
-    path("api/auth/google/",views.googleAuth,name="googleAuth_view"),
-    path("api/registrarQueja/",views.enviarQuejaView,name="enviarQueja_view"),
-    path("api/",include(router.urls)),
+    path("api/validateForgottenPasswordCode/", views.confirmForgottenPasswordCode_view, name="ConfirmForgottenPasswordCode_view"),
+    path("api/changeForgottenPassword/", views.changeForgottenPassword_view, name="changeForgottenPassword_view"),
+    path("api/auth/google/", views.googleAuth, name="googleAuth_view"),
+    #path('admin/', admin.site.urls),
+    path('api/quejas/', include('quejas.urls')),
 ]
-
-#urlpatterns += router.urls  # Incluye las rutas generadas por el router
