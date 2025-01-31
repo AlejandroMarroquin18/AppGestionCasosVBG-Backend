@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Usuarios,Restore_Password_Token
+from .models import Usuarios,Restore_Password_Token, Quejas
 
 class UserSerializer(serializers.ModelSerializer):
     #password = serializers.CharField(write_only=True)
@@ -15,3 +15,8 @@ class RestorePasswordTokenSerializer(serializers.ModelSerializer):
         model=Restore_Password_Token
         fields=['id','codigo','email','creado_en']
         read_only_fields = ['codigo','email', 'creado_en']
+
+class QuejaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quejas
+        fields=fields = '__all__'

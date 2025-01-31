@@ -15,8 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from rest_framework.routers import DefaultRouter
+from django.urls import path,include
+from login.views import QuejaViewSet
 from login import views
+
+
+router = DefaultRouter()
+router.register(r'quejas', QuejaViewSet)  # Esto genera las rutas automáticamente
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,6 +32,9 @@ urlpatterns = [
     path("api/forgottenPassword/", views.forgottenPassword_view, name="forgottenPassword_view"),
     path("api/validateForgottenPasswordCode/",views.confirmForgottenPasswordCode_view,name="ConfirmForgottenPasswordCode_view"),
     path("api/changeForgottenPassword/",views.changeForgottenPassword_view,name="changeForgottenPassword_view"),
-    path("api/auth/google/",views.googleAuth,name="googleAuth_view")
-
+    path("api/auth/google/",views.googleAuth,name="googleAuth_view"),
+    path("api/registrarQueja/",views.enviarQuejaView,name="enviarQueja_view"),
+    path("api/",include(router.urls)),
 ]
+
+#urlpatterns += router.urls  # Incluye las rutas generadas por el router

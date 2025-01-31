@@ -1,10 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import UserSerializer,RestorePasswordTokenSerializer
-from django.contrib.auth.models import User
+from .serializers import UserSerializer,RestorePasswordTokenSerializer,QuejaSerializer
+from .models import Quejas
 from .models import Usuarios, Restore_Password_Token
 from rest_framework.authtoken.models import Token
-from rest_framework import status
+from rest_framework import status, viewsets
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from google.auth.transport import requests
@@ -148,7 +148,32 @@ def googleAuth(request):
 
     except ValueError as e:
         return Response({"error": "Token inválido o caducado.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+########################
+@api_view(['POST'])
+def enviarQuejaView(request):
+    quejaSerializer = QuejaSerializer(data=request.data)
+    if quejaSerializer.is_valid():
+        quejaSerializer.save()
+        return Response(quejaSerializer.data,status=status.HTTP_201_CREATED)
+    return Response(quejaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class QuejaViewSet(viewsets.ModelViewSet):
+    queryset = Quejas.objects.all()  # Recupera todas las quejas
+    serializer_class = QuejaSerializer  # Usa el serializer para validar datos
+    def get_queryset(self):
+        queryset = Quejas.objects.all()
+        query_params = self.request.query_params
+
+        # Recorrer todos los parámetros y aplicarlos como filtros dinámicos
+        filters = {}
+        for param, value in query_params.items():
+            if param in [f.name for f in Quejas._meta.fields]:  # Verificar si el campo existe en el modelo
+                filters[param] = value
+        
+        return queryset.filter(**filters)
 
     
 
