@@ -9,6 +9,13 @@ class Queja(models.Model):
     estado = models.CharField(max_length=30, blank=True)
     detalles = models.CharField(max_length=30, blank=True)
 
+    facultad = models.CharField(max_length=100, null=True,blank=True)
+    unidad = models.CharField(max_length=100, null=True, blank=True)
+
+
+
+
+
     ##Datos de la persona que Reporta
     fecha_recepcion= models.CharField(max_length=30, blank=True)
     reporta_nombre= models.CharField(max_length=30, blank=True)
@@ -72,6 +79,7 @@ class Queja(models.Model):
 
 
 
+    
 
     def __str__(self):
         return f"{self.nombre} - {self.sede} - {self.estado}"
