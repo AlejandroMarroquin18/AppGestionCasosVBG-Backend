@@ -37,4 +37,5 @@ urlpatterns = [
     path("api/auth/google/", views.googleAuth, name="googleAuth_view"),
     #path('admin/', admin.site.urls),
     path('api/quejas/', include('quejas.urls')),
+     path('api/talleres/', include('talleres.urls')),
 ]

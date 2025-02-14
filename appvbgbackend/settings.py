@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'login',
     'corsheaders',
-    'quejas'
+    'quejas',
+    'talleres'
 ]
 
 '''AUTHENTICATION_BACKENDS = [
@@ -107,7 +108,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'vbgdb',  # Nombre de tu base de datos
         'USER': 'postgres',                  # Usuario de PostgreSQL
-        'PASSWORD': 'invitado',           # Contraseña del usuario
+        'PASSWORD': 'postgres',           # Contraseña del usuario
         'HOST': 'localhost',                  # Si está en el mismo equipo
         'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }

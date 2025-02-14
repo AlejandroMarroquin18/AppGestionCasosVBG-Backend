@@ -144,7 +144,7 @@ def googleAuth(request):
             
             token, _ = Token.objects.get_or_create(user=user)
 
-            return Response({"token":token.key,"user": {"email": user.email,"nombre": user.nombre,},"is_new_user": created},status=status.HTTP_200_OK)
+            return Response({"token":token.key,"user": {"email": user.email,"nombre": user.nombre, "rol": user.rol},"is_new_user": created},status=status.HTTP_200_OK)
 
     except ValueError as e:
         return Response({"error": "Token inválido o caducado.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
