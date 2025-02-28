@@ -28,6 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+SUPABASE_URL = 'https://naciauidhigojlrqvvrr.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY2lhdWlkaGlnb2pscnF2dnJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTk1MjYsImV4cCI6MjA0NTg3NTUyNn0.IsLUFzNGtX18tc8PS22cfBQKRAcp7sGnVgwofLTUvtY'
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,9 +41,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'login',
+    'corsheaders',
+    'quejas',
+    'talleres'
 ]
 
+'''AUTHENTICATION_BACKENDS = [
+    'login.authentication.EmailAuthBackend',  # Ruta al backend personalizado  # Backend de Django
+]'''
+
+AUTH_USER_MODEL = 'login.Usuarios'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+}
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -47,9 +70,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'appvbgbackend.urls'
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -75,11 +105,26 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'vbgdb',  # Nombre de tu base de datos
+        'USER': 'postgres',                  # Usuario de PostgreSQL
+        'PASSWORD': 'postgres',           # Contraseña del usuario
+        'HOST': 'localhost',                  # Si está en el mismo equipo
+        'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }
+    
 }
 
+
+#Email Data
+###Ingresar los datos del correo
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Proveedor SMTP, como Gmail (smtp.gmail.com)
+EMAIL_PORT = 587  # Generalmente es 587 para conexiones seguras
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'dawntest90@gmail.com'  # Tu correo electrónico
+EMAIL_HOST_PASSWORD = 'brxz cals xvjk zhvh'  # Tu contrasena
+DEFAULT_FROM_EMAIL = 'dawntest90@gmail.com'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
