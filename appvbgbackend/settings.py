@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +32,8 @@ ALLOWED_HOSTS = []
 SUPABASE_URL = 'https://naciauidhigojlrqvvrr.supabase.co'
 SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY2lhdWlkaGlnb2pscnF2dnJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTk1MjYsImV4cCI6MjA0NTg3NTUyNn0.IsLUFzNGtX18tc8PS22cfBQKRAcp7sGnVgwofLTUvtY'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Application definition
 
@@ -46,7 +49,8 @@ INSTALLED_APPS = [
     'login',
     'corsheaders',
     'quejas',
-    'talleres'
+    'talleres',
+    'participantes'
 ]
 
 '''AUTHENTICATION_BACKENDS = [
