@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'login',
     'corsheaders',
+    'quejas',
+    'talleres'
 ]
 
 '''AUTHENTICATION_BACKENDS = [
@@ -105,7 +107,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'vbgdb',  # Nombre de tu base de datos
-        'USER': 'Dani',                  # Usuario de PostgreSQL
+        'USER': 'postgres',                  # Usuario de PostgreSQL
         'PASSWORD': 'invitado',           # Contraseña del usuario
         'HOST': 'localhost',                  # Si está en el mismo equipo
         'PORT': '5432',                        # Puerto por defecto de PostgreSQL
@@ -113,6 +115,16 @@ DATABASES = {
     
 }
 
+
+#Email Data
+###Ingresar los datos del correo
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Proveedor SMTP, como Gmail (smtp.gmail.com)
+EMAIL_PORT = 587  # Generalmente es 587 para conexiones seguras
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'dawntest90@gmail.com'  # Tu correo electrónico
+EMAIL_HOST_PASSWORD = 'brxz cals xvjk zhvh'  # Tu contrasena
+DEFAULT_FROM_EMAIL = 'dawntest90@gmail.com'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
