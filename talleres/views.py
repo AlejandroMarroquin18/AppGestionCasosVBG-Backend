@@ -7,6 +7,8 @@ from .models import Workshop
 from participantes.models import Participant  # Importamos el modelo Participant
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from .models import Workshop
+from django.db.models import Count, Avg, F
 
 @api_view(['GET', 'POST'])
 def workshop_list(request):
@@ -58,3 +60,37 @@ def register_participant(request, workshop_id):
         participant = serializer.save(workshop=workshop)  # Guardamos el participante y lo asociamos al taller
         return Response(serializer.data, status=status.HTTP_201_CREATED)  # Respondemos con los datos del participante
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def statistics(request):
+    # Número total de talleres
+    total_workshops = Workshop.objects.count()
+
+    # Talleres virtuales y presenciales
+    virtual_workshops = Workshop.objects.filter(modality='virtual').count()
+    in_person_workshops = total_workshops - virtual_workshops
+
+    # Participantes totales
+    total_participants = Participant.objects.count()
+
+    # Participantes promedio por taller
+    average_participants = Participant.objects.values('workshop').annotate(count=Count('id')).aggregate(Avg('count'))
+
+    # Porcentaje de participantes por género
+    gender_stats = Participant.objects.values('gender_identity').annotate(count=Count('id'))
+
+    # Participantes por programa
+    program_stats = Participant.objects.values('program').annotate(count=Count('id'))
+
+    data = {
+        'total_workshops': total_workshops,
+        'virtual_workshops': virtual_workshops,
+        'in_person_workshops': in_person_workshops,
+        'total_participants': total_participants,
+        'average_participants': average_participants.get('count__avg', 0),
+        'gender_stats': gender_stats,
+        'program_stats': program_stats  # Agregar estadísticas de programa
+    }
+
+    return Response(data)
