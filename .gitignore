@@ -5,3 +5,4 @@
 /appvbgbackend/Scripts/
 /appvbgbackend/Lib/
 /appvbgbackend/pyvenv.cfg
+.env

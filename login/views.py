@@ -11,6 +11,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 import os
 
+
 @api_view(['POST'])
 def login_view(request):
     
@@ -114,7 +115,10 @@ def changeForgottenPassword_view(request):
         return Response({'status':'success', 'message':'Password cambiada correctamente'}, status=status.HTTP_200_OK)
     else:
         return Response({'status':'error','message':'El token no concuerda con el generado'},status=status.HTTP_401_UNAUTHORIZED)
-    
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+
 @api_view(['POST'])
 def googleAuth(request):
     auth_code = request.data.get('code')  #  Recibir "code" en lugar de "access_token"
@@ -126,8 +130,8 @@ def googleAuth(request):
         # 🔥 Intercambiar el código por tokens en Google
         google_token_url = "https://oauth2.googleapis.com/token"
         token_data = {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
             "code": auth_code,  # 🔥 Ahora usamos "code", no "access_token"
             "grant_type": "authorization_code",
             "redirect_uri": "http://localhost:3000",  # Asegúrate de que coincide con Google Console
@@ -201,8 +205,8 @@ def refresh_google_token(request):
         # Solicitar un nuevo access_token a Google
         google_token_url = "https://oauth2.googleapis.com/token"
         token_data = {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
             "refresh_token": refresh_token,
             "grant_type": "refresh_token",
         }

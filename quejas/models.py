@@ -33,10 +33,7 @@ class Queja(models.Model):
     afectado_nombre= models.CharField(max_length=30, blank=True)
     afectado_sexo= models.CharField(max_length=30, blank=True)
     afectado_edad= models.CharField(max_length=30, blank=True)
-<<<<<<< HEAD
     afectado_codigo = models.CharField(max_length=30, blank=True)
-=======
->>>>>>> 7b44f3587e04e0cc0543593b6e13e0f97595b9af
     afectado_comuna= models.CharField(max_length=30, blank=True)
     afectado_estrato_socioeconomico= models.CharField(max_length=30, blank=True)
     afectado_condicion_etnico_racial= models.CharField(max_length=30, blank=True)
@@ -77,11 +74,7 @@ class Queja(models.Model):
     acompañamiento_solicitud_medidas_proteccion_inicial= models.CharField(max_length=30, blank=True)
     acompañamiento_ante_instancias_gubernamentales= models.CharField(max_length=30, blank=True)
     interponer_queja_al_comite_asusntos_internos_disciplinarios= models.CharField(max_length=30, blank=True)
-<<<<<<< HEAD
     observaciones= models.CharField(max_length=700,default='hola')
-=======
-    observaciones= models.CharField(max_length=500,default='hola')
->>>>>>> 7b44f3587e04e0cc0543593b6e13e0f97595b9af
 
 
 
