@@ -37,9 +37,10 @@ urlpatterns = [
     path("api/validateForgottenPasswordCode/", views.confirmForgottenPasswordCode_view, name="ConfirmForgottenPasswordCode_view"),
     path("api/changeForgottenPassword/", views.changeForgottenPassword_view, name="changeForgottenPassword_view"),
     path("api/auth/google/", views.googleAuth, name="googleAuth_view"),
+    path("api/auth/refresh-token/",views.refresh_google_token, name="refresh_google_token"),
     #path('admin/', admin.site.urls),
     path('api/quejas/', include('quejas.urls')),
-     path('api/talleres/', include('talleres.urls')),
+    path('api/talleres/', include('talleres.urls')),
 ]
 
 if settings.DEBUG:

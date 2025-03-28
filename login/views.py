@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import UserSerializer,RestorePasswordTokenSerializer
-#from .models import Quejas
+from .serializers import UserSerializer
+import requests as req 
 from .models import Usuarios, Restore_Password_Token
 from rest_framework.authtoken.models import Token
 from rest_framework import status, viewsets
@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from google.auth.transport import requests
 from google.oauth2 import id_token
-
+import os
 
 @api_view(['POST'])
 def login_view(request):
@@ -115,49 +115,112 @@ def changeForgottenPassword_view(request):
     else:
         return Response({'status':'error','message':'El token no concuerda con el generado'},status=status.HTTP_401_UNAUTHORIZED)
     
-
 @api_view(['POST'])
 def googleAuth(request):
-    token=request.data.get('token')
-    credential = token.get('credential')
+    auth_code = request.data.get('code')  #  Recibir "code" en lugar de "access_token"
+
+    if not auth_code:
+        return Response({"error": "No se recibió el código de autorización."}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-            # Verificar el token usando la librería google-auth
-            idinfo = id_token.verify_oauth2_token(credential, requests.Request(), "588252644218-dt51gh548k7gtkkt7vr9o0srms640333.apps.googleusercontent.com")
+        # 🔥 Intercambiar el código por tokens en Google
+        google_token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "code": auth_code,  # 🔥 Ahora usamos "code", no "access_token"
+            "grant_type": "authorization_code",
+            "redirect_uri": "http://localhost:3000",  # Asegúrate de que coincide con Google Console
+        }
+        token_response = req.post(google_token_url, data=token_data)
 
-            # Obtener información del usuario desde el token
-            email = idinfo.get('email')
-            name = idinfo.get('name')
+        if token_response.status_code != 200:
+            return Response({"error": "Error al obtener tokens de Google.", "details": token_response.json()}, status=status.HTTP_400_BAD_REQUEST)
 
-            if not email:
-                return Response({"error": "No se pudo verificar el correo electrónico."}, status=status.HTTP_400_BAD_REQUEST)
+        token_json = token_response.json()
+        access_token = token_json.get("access_token")
+        refresh_token = token_json.get("refresh_token")  # 🔥 Ahora obtenemos el refresh_token
 
-            data={'email': email,'nombre':name,'rol':'developer','username':name,'telefono':'000000'}
-            # Verificar si el usuario ya existe
-            user, created = Usuarios.objects.get_or_create(email=email, defaults=data)
+        if not access_token:
+            return Response({"error": "No se recibió el access_token."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Opcional: Actualizar el nombre si cambió
-            if not created and user.nombre != name:
-                user.nombre = name
-                user.save()
+        # 🔥 Obtener información del usuario
+        google_user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        google_response = req.get(google_user_info_url, headers=headers)
 
-            # Generar un token de autenticación para el usuario
-            
-            token, _ = Token.objects.get_or_create(user=user)
+        if google_response.status_code != 200:
+            return Response({"error": "No se pudo verificar el usuario con Google."}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({"token":token.key,"user": {"email": user.email,"nombre": user.nombre, "rol": user.rol},"is_new_user": created},status=status.HTTP_200_OK)
+        user_data = google_response.json()
+        email = user_data.get('email')
+        name = user_data.get('name')
 
-    except ValueError as e:
-        return Response({"error": "Token inválido o caducado.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not email:
+            return Response({"error": "No se pudo obtener el correo electrónico."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 🔥 Guardar usuario en la base de datos
+        user, created = Usuarios.objects.get_or_create(email=email, defaults={"nombre": name, "rol":"developer"})
+
+        # 🔥 Guardar el refresh_token solo si se recibe
+        if refresh_token:
+            user.refresh_token = refresh_token
+            user.save()
+
+        # Generar un token de Django
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "token": token.key,
+            "access_token": access_token,
+            "refresh_token": refresh_token if refresh_token else "No se recibió",
+            "user": {"email": user.email, "nombre": user.nombre},
+            "is_new_user": created
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": "Error en la autenticación con Google.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['POST'])
+def refresh_google_token(request):
+    email = request.data.get("email")
     
-########################
-'''@api_view(['POST'])
-def enviarQuejaView(request):
-    quejaSerializer = QuejaSerializer(data=request.data)
-    if quejaSerializer.is_valid():
-        quejaSerializer.save()
-        return Response(quejaSerializer.data,status=status.HTTP_201_CREATED)
-    return Response(quejaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
-'''
+    if not email:
+        return Response({"error": "No se proporcionó email"}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+    try:
+        user = Usuarios.objects.get(email=email)
+        refresh_token = user.refresh_token
 
+        if not refresh_token:
+            return Response({"error": "No se encontró refresh_token para este usuario"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Solicitar un nuevo access_token a Google
+        google_token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        }
+        token_response = req.post(google_token_url, data=token_data)
+
+        if token_response.status_code != 200:
+            return Response({"error": "No se pudo renovar el token", "details": token_response.json()}, status=status.HTTP_400_BAD_REQUEST)
+
+        token_json = token_response.json()
+        new_access_token = token_json.get("access_token")
+        expires_in = token_json.get("expires_in")
+
+        return Response({
+            "access_token": new_access_token,
+            "expires_in": expires_in
+        }, status=status.HTTP_200_OK)
+
+    except Usuarios.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": "Error al renovar el token", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)

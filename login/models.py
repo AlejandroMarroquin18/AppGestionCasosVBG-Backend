@@ -10,6 +10,8 @@ class Usuarios(AbstractUser):
     rol = models.CharField(max_length=30)
     telefono = models.CharField(max_length=15, blank=True, null=True)
     username = models.CharField(max_length=150, unique=False, default='')
+    refresh_token = models.TextField(blank=True, null=True)
+    
     USERNAME_FIELD = 'email'  # Ahora el email es el campo principal de autenticación
     REQUIRED_FIELDS = [ 'nombre', 'rol', 'telefono']
 
