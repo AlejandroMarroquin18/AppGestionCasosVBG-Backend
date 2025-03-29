@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from talleres.models import Workshop
 from .models import Participant
 from .serializers import ParticipantSerializer
+from django.shortcuts import get_object_or_404
+
 
 @api_view(['POST'])
 def register_participant(request, workshop_id):

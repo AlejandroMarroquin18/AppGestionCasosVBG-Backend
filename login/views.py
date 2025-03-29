@@ -1,7 +1,8 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .serializers import UserSerializer
 import requests as req 
+import requests
 from .models import Usuarios, Restore_Password_Token
 from rest_framework.authtoken.models import Token
 from rest_framework import status, viewsets
@@ -10,6 +11,13 @@ from django.core.mail import send_mail
 from google.auth.transport import requests
 from google.oauth2 import id_token
 import os
+from django.http import JsonResponse
+import json
+from django.middleware.csrf import get_token
+from django.contrib.auth import login, logout
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 @api_view(['POST'])
@@ -77,7 +85,7 @@ def forgottenPassword_view(request):
         
         return Response({'message': 'codigo enviado al correo'},status=status.HTTP_200_OK)
     except Exception as e:
-        print("no se pudo")
+        print("no se pudo enviar el correo")
         return Response({'status':'error','message': f'Error al enviar el correo electronico {e}'},status=status.HTTP_408_REQUEST_TIMEOUT)
 
     
@@ -148,7 +156,7 @@ def googleAuth(request):
         if not access_token:
             return Response({"error": "No se recibió el access_token."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 🔥 Obtener información del usuario
+        #  Obtener información del usuario
         google_user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
         headers = {"Authorization": f"Bearer {access_token}"}
         google_response = req.get(google_user_info_url, headers=headers)
@@ -163,24 +171,51 @@ def googleAuth(request):
         if not email:
             return Response({"error": "No se pudo obtener el correo electrónico."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 🔥 Guardar usuario en la base de datos
+        #  Guardar usuario en la base de datos
         user, created = Usuarios.objects.get_or_create(email=email, defaults={"nombre": name, "rol":"developer"})
 
-        # 🔥 Guardar el refresh_token solo si se recibe
+        #  Guardar el refresh_token solo si se recibe
         if refresh_token:
             user.refresh_token = refresh_token
             user.save()
+        
+        
 
+        # 🔥 Obtener el token CSRF para seguridad
+        csrf_token = get_token(request)
+
+        print(csrf_token)
         # Generar un token de Django
         token, _ = Token.objects.get_or_create(user=user)
 
-        return Response({
+        response = Response({
             "token": token.key,
-            "access_token": access_token,
-            "refresh_token": refresh_token if refresh_token else "No se recibió",
             "user": {"email": user.email, "nombre": user.nombre},
             "is_new_user": created
         }, status=status.HTTP_200_OK)
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,  # No accesible desde JavaScript
+            secure=False,  # Solo en HTTPS (puedes cambiarlo a False en desarrollo)
+            samesite="Lax",
+            max_age=3600,  # 1 hora
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token if refresh_token else "",
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=60 * 60 * 24 ,  # 1 día
+        )
+
+        response.set_cookie("csrftoken", csrf_token, secure=False, samesite="Lax")
+        # 🔥 Iniciar sesión en Django
+        login(request, user)
+        return response
 
     except Exception as e:
         return Response({"error": "Error en la autenticación con Google.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -228,3 +263,36 @@ def refresh_google_token(request):
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": "Error al renovar el token", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(["POST"])
+def logout_view(request):
+    print("✅ Cookies recibidas:", request.COOKIES)  # 🔥 Ver cookies
+    print("✅ Headers recibidos:", request.headers)  # 🔥 Ver headers
+    print("✅ Usuario autenticado:", request.user)  # 🔥 Ver usuario
+    print("Usuario autenticado:", request)  # 🔥 Debería mostrar el usuario
+    logout(request)
+    print("Después del logout, usuario:", request.user)  # 🔥 Debería estar vacío
+    # 🔥 Elimina las cookies de sesión y CSRF
+    response = Response({"message": "Sesión cerrada correctamente"}, status=200)
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("csrftoken")
+     # 🔥 Eliminar todas las cookies relacionadas con autenticación
+    response.delete_cookie("sessionid", path="/")
+    response.delete_cookie("csrftoken", path="/")
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
+
+    return response
+
+
+
+@api_view(["GET"])
+def test_csrf(request):
+    csrf_token = get_token(request)
+    print("CSRF Token generado:", csrf_token)  # 🔍 Verifica que se genere
+    response = Response({"csrf_token": csrf_token})
+    response.set_cookie("csrftoken", csrf_token, secure=False, samesite="Lax")
+    return response

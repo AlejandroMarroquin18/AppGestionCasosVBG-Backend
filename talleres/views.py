@@ -9,6 +9,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Workshop
 from django.db.models import Count, Avg, F
+from django.core.mail import send_mail
 
 @api_view(['GET', 'POST'])
 def workshop_list(request):
@@ -39,6 +40,25 @@ def workshop_detail(request, pk):
         serializer = WorkshopSerializer(workshop)
         return Response(serializer.data)
     elif request.method == 'DELETE':
+
+        
+        ###Enviar correo a los participantes
+        participants = Participant.objects.filter(workshop=workshop)
+        
+        destinatarios  = [participant.email for participant in participants]
+        
+        if destinatarios:  # Verificar que haya destinatarios
+            remitente = 'dawntest90@gmail.com'
+            asunto = f'Cancelacion del taller {workshop.name}'
+            mensaje = f'El taller de {workshop.name}, ha sido cancelado, gracias por inscribirte '
+            
+            send_mail(asunto, mensaje,remitente,destinatarios)
+            
+            
+            
+
+            
+        
         workshop.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     elif request.method == 'PATCH':

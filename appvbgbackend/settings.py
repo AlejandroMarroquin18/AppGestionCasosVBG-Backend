@@ -20,6 +20,31 @@ load_dotenv()
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
+
+##Manejo de Cookies
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+SESSION_COOKIE_NAME = "sessionid"
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+##CORS
+
+CORS_ALLOW_CREDENTIALS = True  # Permite el envío de cookies o tokens de autenticación
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # Asegúrate de incluirlo si usas CSRF
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,8 +61,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-SUPABASE_URL = 'https://naciauidhigojlrqvvrr.supabase.co'
-SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY2lhdWlkaGlnb2pscnF2dnJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAyOTk1MjYsImV4cCI6MjA0NTg3NTUyNn0.IsLUFzNGtX18tc8PS22cfBQKRAcp7sGnVgwofLTUvtY'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -57,7 +80,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'quejas',
     'talleres',
-    'participantes'
+    'participantes',
 ]
 
 '''AUTHENTICATION_BACKENDS = [
@@ -87,10 +110,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'appvbgbackend.urls'
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
-CORS_ALLOW_ALL_ORIGINS = True
+
 
 TEMPLATES = [
     {

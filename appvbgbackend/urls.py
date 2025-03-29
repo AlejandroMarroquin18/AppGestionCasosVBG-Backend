@@ -23,6 +23,7 @@ from rest_framework.routers import DefaultRouter
 from quejas.views import QuejaViewSet
 from django.conf import settings
 from django.conf.urls.static import static
+from login import useGoogleCalendar
 
 router = DefaultRouter()
 router.register(r'quejas', QuejaViewSet)
@@ -32,6 +33,7 @@ router.register(r'quejas', QuejaViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/login/", views.login_view, name="login_view"),
+    path("api/logout/", views.logout_view, name="logout"),
     path("api/register/", views.register_view, name="register_view"),
     path("api/forgottenPassword/", views.forgottenPassword_view, name="forgottenPassword_view"),
     path("api/validateForgottenPasswordCode/", views.confirmForgottenPasswordCode_view, name="ConfirmForgottenPasswordCode_view"),
@@ -41,6 +43,19 @@ urlpatterns = [
     #path('admin/', admin.site.urls),
     path('api/quejas/', include('quejas.urls')),
     path('api/talleres/', include('talleres.urls')),
+
+
+
+    #calendario
+    path('api/calendar/fetchEvents/<int:year>',useGoogleCalendar.fetch_events,name="fetchByYear"),
+    path('api/calendar/create',useGoogleCalendar.create_event,name="createEvent"),
+    path('api/calendar/update/<str:eventId>',useGoogleCalendar.update_event,name="updateEvent"),
+    path('api/calendar/delete/<str:eventId>',useGoogleCalendar.delete_event,name="deleteEvent"),
+    path('api/calendar/fetchById/<str:eventId>',useGoogleCalendar.fetch_event_by_id,name="fetchById"),
+
+    #test de generacion de tokens CSRF
+    path('api/test-csrf/',views.test_csrf,name="yrghfgiier"),
+    
 ]
 
 if settings.DEBUG:
