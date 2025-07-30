@@ -43,6 +43,8 @@ urlpatterns = [
     #path('admin/', admin.site.urls),
     path('api/quejas/', include('quejas.urls')),
     path('api/talleres/', include('talleres.urls')),
+    ##las de agenda
+    path('api/events/',include('agenda.urls')),
 
 
 

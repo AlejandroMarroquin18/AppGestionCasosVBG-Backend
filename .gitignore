@@ -6,3 +6,8 @@
 /appvbgbackend/Lib/
 /appvbgbackend/pyvenv.cfg
 .env
+/bot/
+comandos.txt
+/talleres/__pycache__/
+/agenda/__pycache__/
+/quejas/__pycache__/

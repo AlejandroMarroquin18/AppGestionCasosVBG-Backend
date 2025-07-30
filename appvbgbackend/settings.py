@@ -58,7 +58,7 @@ SECRET_KEY = 'django-insecure-_+k%u()ao&t4_b#5rre#_igz_ozt$)s7k_k#skfdj#limw%77_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 
@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'quejas',
     'talleres',
     'participantes',
+    'agenda',
 ]
 
 '''AUTHENTICATION_BACKENDS = [

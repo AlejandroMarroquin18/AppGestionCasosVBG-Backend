@@ -1,15 +1,11 @@
 from django.db import models
 
 class Queja(models.Model):
-    nombre = models.CharField(max_length=30, blank=True)
-    sede = models.CharField(max_length=30, blank=True)
-    codigo = models.CharField(max_length=30, blank=True)
-    tipo_de_acompanamiento = models.CharField(max_length=30, blank=True)
-    fecha = models.CharField(max_length=30, blank=True)
-    estado = models.CharField(max_length=30, blank=True)
-    detalles = models.CharField(max_length=30, blank=True)
+    
 
-    facultad = models.CharField(max_length=100, null=True,blank=True)
+    
+    tipo_de_acompanamiento = models.CharField(max_length=30, blank=True)
+    estado = models.CharField(max_length=30, blank=True)
     unidad = models.CharField(max_length=100, null=True, blank=True)
 
 
@@ -76,11 +72,6 @@ class Queja(models.Model):
     interponer_queja_al_comite_asusntos_internos_disciplinarios= models.CharField(max_length=30, blank=True)
     observaciones= models.CharField(max_length=700,default='hola')
 
-
-
-
-
-    
 
     def __str__(self):
         return f"{self.nombre} - {self.sede} - {self.estado}"

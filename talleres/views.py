@@ -53,19 +53,35 @@ def workshop_detail(request, pk):
             mensaje = f'El taller de {workshop.name}, ha sido cancelado, gracias por inscribirte '
             
             send_mail(asunto, mensaje,remitente,destinatarios)
-            
-            
-            
-
-            
+        
         
         workshop.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     elif request.method == 'PATCH':
+        original_start_time = workshop.start_time
+        original_end_time = workshop.end_time
         serializer = WorkshopSerializer(workshop, data=request.data, partial=True)  # partial=True permite actualizaciones parciales
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+
+            updated_workshop = serializer.save()
+            # Comprobar si cambió el tiempo
+            if original_start_time != updated_workshop.start_time or original_end_time != updated_workshop.end_time:
+                participants = Participant.objects.filter(workshop=updated_workshop)
+                destinatarios = [participant.email for participant in participants]
+
+                if destinatarios:
+                    remitente = 'dawntest90@gmail.com'
+                    asunto = f'Actualización de horario del taller {updated_workshop.name}'
+                    mensaje = (
+                        f'El taller "{updated_workshop.name}" ha cambiado de horario.\n\n'
+                        f'Nuevo inicio: {updated_workshop.start_time}\n'
+                        f'Nuevo fin: {updated_workshop.end_time}\n\n'
+                        f'Gracias por tu participación.'
+                    )
+                    send_mail(asunto, mensaje, remitente, destinatarios)
+
+
+            return Response(WorkshopSerializer(updated_workshop).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])

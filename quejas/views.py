@@ -1,12 +1,13 @@
 # quejas/views.py
-
+import re
 from django.http import JsonResponse
 from .models import Queja
 from .serializers import QuejaSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.db.models import Count
+from datetime import datetime
 from rest_framework import viewsets
 from .models import Queja
 from .serializers import QuejaSerializer
@@ -36,4 +37,86 @@ class QuejaViewSet(viewsets.ModelViewSet):
                 filters[param] = value
         
         return queryset.filter(**filters)
+
+
+
+@api_view(['GET'])
+def statistics(request):
+    conteo_por_anio = {}
+    conteo_por_mes = {}
+
+    # Soporta fechas tipo 1/1/2024, 01/01/2024, etc.
+    patron_fecha = re.compile(r'(\d{1,2})/(\d{1,2})/(\d{4})')
+
+    quejas = Queja.objects.all()
+
+    for q in quejas:
+        match = patron_fecha.match(q.fecha_recepcion.strip())
+        if match:
+            dia = int(match.group(1))
+            mes = int(match.group(2))
+            año = int(match.group(3))
+
+            conteo_por_anio[año] = conteo_por_anio.get(año, 0) + 1
+            conteo_por_mes[mes] = conteo_por_mes.get(mes, 0) + 1
+
+
+    # Total recibido en el año actual (usando campo 'fecha' que debe tener el año)
+    ##total_actual = Queja.objects.filter(fecha_recepcion__icontains=str(año_actual)).count()
+
+    # Conteo por estamento del afectado
+    estudiantes = Queja.objects.filter(afectado_estamento__iexact='Estudiante').count()
+    profesores = Queja.objects.filter(afectado_estamento__iexact='Docente').count()
+    funcionarios = Queja.objects.filter(afectado_estamento__iexact='Funcionario').count()
+
+    # Conteo por facultades del afectado
+    facultades = (
+        Queja.objects
+        .values('afectado_facultad')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    # Conteo por sedes del afectado
+    sedes = (
+        Queja.objects
+        .values('afectado_sede')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    
+
+    # Conteo por vicerrectoría adscrita del afectado
+    vicerrectorias = (
+        Queja.objects
+        .values('afectado_vicerrectoria_adscrito')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    # Conteo por identidad de género del afectado
+    generos = (
+        Queja.objects
+        .values('afectado_identidad_genero')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    return Response({
+        'conteo_por_anio': conteo_por_anio,
+        'conteo_por_mes': conteo_por_mes,
+        'afectado_estudiantes': estudiantes,
+        'afectado_profesores': profesores,
+        'afectado_funcionarios': funcionarios,
+        'conteo_por_facultad_afectado': list(facultades),
+        'conteo_por_sede_afectado': list(sedes),
+        
+        'conteo_por_vicerrectoria_adscrita_afectado': list(vicerrectorias),
+        'conteo_por_genero_afectado': list(generos),
+    })
+
+
+
+
 
