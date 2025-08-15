@@ -15,9 +15,14 @@ def event_list_create(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
+
+        dataCopy = request.data.copy()
+        
+        # Modificar el campo que necesitas antes de validar
+        dataCopy['status'] = 'Creado'
         
         
-        serializer = EventSerializer(data=request.data)
+        serializer = EventSerializer(data=dataCopy)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -27,7 +32,7 @@ def event_list_create(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def event_detail(request, pk):
     try:
-        event = Event.objects.get(pk=pk)
+        event = Event.objects.get(google_event_id=pk)
     except Event.DoesNotExist:
         return Response({'error': 'Evento no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 

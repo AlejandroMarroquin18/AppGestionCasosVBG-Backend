@@ -82,12 +82,12 @@ def create_event(request):
     """
 
     access_token = get_token_from_cookies(request)
-    print("hola")
+    
     if not access_token:
         return Response({"error": "Access token not found in cookies"}, status=status.HTTP_401_UNAUTHORIZED)
     
     event_data = request.data
-    print("hola2")
+    
     try:
         response = requests.post(
             f"{API_URL}/calendars/primary/events?conferenceDataVersion=1",

@@ -2,15 +2,10 @@ from django.db import models
 
 class Queja(models.Model):
     
-
     
     tipo_de_acompanamiento = models.CharField(max_length=30, blank=True)
     estado = models.CharField(max_length=30, blank=True)
     unidad = models.CharField(max_length=100, null=True, blank=True)
-
-
-
-
 
     ##Datos de la persona que Reporta
     fecha_recepcion= models.CharField(max_length=30, blank=True)
@@ -18,7 +13,7 @@ class Queja(models.Model):
     reporta_Sexo= models.CharField(max_length=30, blank=True)
     reporta_edad= models.CharField(max_length=30, blank=True)
     reporta_estamento= models.CharField(max_length=30, blank=True)
-    reporta_vicerrectoria_adscrito= models.CharField(max_length=30, blank=True)
+    reporta_vicerrectoria_adscrito= models.CharField(max_length=52, blank=True)
     reporta_dependencia= models.CharField(max_length=30, blank=True)
     reporta_programa_academico= models.CharField(max_length=30, blank=True)
     reporta_facultad= models.CharField(max_length=30, blank=True)
@@ -38,7 +33,7 @@ class Queja(models.Model):
     afectado_identidad_genero= models.CharField(max_length=30, blank=True)
     afectado_orientacion_sexual= models.CharField(max_length=30, blank=True)
     afectado_estamento= models.CharField(max_length=30, blank=True)
-    afectado_vicerrectoria_adscrito= models.CharField(max_length=30, blank=True)
+    afectado_vicerrectoria_adscrito= models.CharField(max_length=52, blank=True)
     afectado_dependencia= models.CharField(max_length=30, blank=True)
     afectado_programa_academico= models.CharField(max_length=30, blank=True)
     afectado_facultad= models.CharField(max_length=30, blank=True)
@@ -57,7 +52,7 @@ class Queja(models.Model):
     agresor_identidad_genero= models.CharField(max_length=30, blank=True)
     agresor_orientacion_sexual= models.CharField(max_length=30, blank=True)
     agresor_estamento= models.CharField(max_length=30, blank=True)
-    agresor_vicerrectoria_adscrito= models.CharField(max_length=30, blank=True)
+    agresor_vicerrectoria_adscrito= models.CharField(max_length=52, blank=True)
     agresor_dependencia= models.CharField(max_length=30, blank=True)
     agresor_programa_academico= models.CharField(max_length=30, blank=True)
     agresor_facultad= models.CharField(max_length=30, blank=True)
@@ -75,3 +70,11 @@ class Queja(models.Model):
 
     def __str__(self):
         return f"{self.nombre} - {self.sede} - {self.estado}"
+    
+class HistorialQueja(models.Model):
+    fecha= models.DateTimeField(auto_now_add=True)
+    queja_id = models.ForeignKey(Queja, related_name='historial_estados', on_delete=models.SET_NULL,null=True)
+    descripcion= models.CharField(max_length=300, blank=True)
+    tipo= models.CharField(max_length=50, blank=True)
+    def __str__(self):
+        return f"ID: {self.id} - Fecha: {self.fecha}"

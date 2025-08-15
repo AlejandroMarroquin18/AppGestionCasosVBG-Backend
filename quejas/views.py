@@ -37,8 +37,25 @@ class QuejaViewSet(viewsets.ModelViewSet):
                 filters[param] = value
         
         return queryset.filter(**filters)
+    
+    ####Essto se añade para que al crear una queja, el estado se establezca en 'pendiente' por defecto, ye
+    def create(self, request, *args, **kwargs):
+         # Copia mutable de los datos recibidos
+        data = request.data.copy()
+        
+        # Modificar el campo que necesitas antes de validar
+        data['estado'] = 'pendiente'  
 
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+def validar_case_id(request, case_id):
+    existe = Queja.objects.filter(id=case_id).exists()
+    return Response({"exists": existe}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def statistics(request):
@@ -103,6 +120,13 @@ def statistics(request):
         .order_by('-total')
     )
 
+    '''
+    Vicerrectoría Académica
+    Vicerrectoría Administrativa
+    Vicerrectoría de Bienestar Universitario
+    Vicerrectoría de Investigaciones
+    Vicerrectoría de Regionalización
+    Vicerrectoría de Extensión y Proyección Social '''
     return Response({
         'conteo_por_anio': conteo_por_anio,
         'conteo_por_mes': conteo_por_mes,

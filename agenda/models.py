@@ -5,7 +5,7 @@ from django.db import models
 class Event(models.Model):
     title=models.CharField(max_length=255,blank=True)#Titulo
     description=models.CharField(blank=True)#Descripcion
-    status=models.CharField()#Cancelado, aplazado y tales
+    status=models.CharField(default='Creado')#Cancelado, aplazado y tales
     location=models.CharField(max_length=255, blank=True)#lugar
     attendes=models.CharField(blank=True,null=True)#asistentes, correos electronicos preferiblemente
     color= models.CharField(max_length=8,blank=True,null=True)#Colores
@@ -17,7 +17,8 @@ class Event(models.Model):
     timezone=models.CharField(max_length=100, default='America/Bogota')#Zona horaria
 
     type= models.CharField(max_length=100)##Tipo de reunion/orientacion/asesoría
-    case_id=models.CharField(max_length=100)##id de la queja relacionada
+    ##case_id=models.CharField(max_length=100)##id de la queja relacionada
+    case_id = models.ForeignKey('quejas.Queja',on_delete=models.SET_NULL,null=True,blank=True)
 
 
     ##Descartar si no se van a usar más
