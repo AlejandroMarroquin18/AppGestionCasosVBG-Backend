@@ -44,7 +44,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
         data = request.data.copy()
         
         # Modificar el campo que necesitas antes de validar
-        data['estado'] = 'pendiente'  
+        data['estado'] = 'Pendiente'  
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -85,6 +85,17 @@ def statistics(request):
     estudiantes = Queja.objects.filter(afectado_estamento__iexact='Estudiante').count()
     profesores = Queja.objects.filter(afectado_estamento__iexact='Docente').count()
     funcionarios = Queja.objects.filter(afectado_estamento__iexact='Funcionario').count()
+    ##remitidos
+    remitidosEstudiantes = Queja.objects.filter(
+    afectado_estamento__iexact='Estudiante', estado__iexact='Remitido'
+    ).count()
+    remitidosProfesores = Queja.objects.filter(
+        afectado_estamento__iexact='Docente', estado__iexact='Remitido'
+    ).count()
+    remitidosFuncionarios = Queja.objects.filter(
+        afectado_estamento__iexact='Funcionario', estado__iexact='Remitido'
+    ).count()
+
 
     # Conteo por facultades del afectado
     facultades = (
@@ -130,9 +141,17 @@ def statistics(request):
     return Response({
         'conteo_por_anio': conteo_por_anio,
         'conteo_por_mes': conteo_por_mes,
+
+
         'afectado_estudiantes': estudiantes,
         'afectado_profesores': profesores,
         'afectado_funcionarios': funcionarios,
+        
+        'remitidos_estudiantes': remitidosEstudiantes,
+        'remitidos_profesores': remitidosProfesores,
+        'remitidos_funcionarios': remitidosFuncionarios,
+
+        
         'conteo_por_facultad_afectado': list(facultades),
         'conteo_por_sede_afectado': list(sedes),
         

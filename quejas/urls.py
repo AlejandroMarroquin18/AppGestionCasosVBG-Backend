@@ -5,18 +5,6 @@ from . import views
 from . import historialview
 
 
-historial_queja_list = historialview.HistorialQuejaViewSet.as_view({
-    'get': 'retrieve_by_caso',
-    'post': 'create'
-})
-
-historial_queja_detail = historialview.HistorialQuejaViewSet.as_view({
-    'get': 'retrieve',
-    'put': 'update',
-    'patch': 'partial_update',
-    'delete': 'destroy'
-})
-
 
 
 
@@ -30,7 +18,8 @@ urlpatterns = [
     path('<int:pk>/', QuejaViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
-        'delete': 'destroy'
+        'delete': 'destroy',
+        'patch': 'partial_update'
     }), name='quejas-detail'),
 
 

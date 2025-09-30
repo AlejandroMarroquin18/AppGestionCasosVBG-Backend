@@ -58,6 +58,7 @@ def workshop_detail(request, pk):
         workshop.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     elif request.method == 'PATCH':
+        print ("Datos recibidos para actualizar el taller:", request.data)
         original_start_time = workshop.start_time
         original_end_time = workshop.end_time
         serializer = WorkshopSerializer(workshop, data=request.data, partial=True)  # partial=True permite actualizaciones parciales

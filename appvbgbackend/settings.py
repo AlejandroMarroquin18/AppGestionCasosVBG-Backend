@@ -22,24 +22,36 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 
 ##Manejo de Cookies
+SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+SESSION_COOKIE_SECURE = True  # Cambia a True en producción con HTTPS
+#SESSION_COOKIE_NAME = "sessionid"
+
+CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
-SESSION_COOKIE_NAME = "sessionid"
+CSRF_COOKIE_SECURE = True  # Cambia a True en producción con HTTPS
+SESSION_SAVE_EVERY_REQUEST = False
+
 
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 ##CORS
 
 CORS_ALLOW_CREDENTIALS = True  # Permite el envío de cookies o tokens de autenticación
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",  # Asegúrate de incluirlo si usas CSRF
+    "http://127.0.0.1:3000",
+    "https://localhost:3000", 
+    "https://127.0.0.1:3000",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://localhost:3000", 
+    "https://127s.0.0.1:3000",
 ]
 
 
@@ -82,6 +94,7 @@ INSTALLED_APPS = [
     'talleres',
     'participantes',
     'agenda',
+    'django_extensions',
 ]
 
 '''AUTHENTICATION_BACKENDS = [
@@ -91,6 +104,15 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'login.Usuarios'
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],

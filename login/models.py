@@ -26,3 +26,17 @@ class Restore_Password_Token(models.Model):
     email=models.EmailField(unique=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
+
+
+class GoogleOAuth(models.Model):
+    user = models.OneToOneField(Usuarios, on_delete=models.CASCADE, related_name='google_oauth')
+    access_token = models.TextField()
+    refresh_token = models.TextField(blank=True, null=True)
+    token_type = models.CharField(max_length=20, default='Bearer')
+    scope = models.TextField(blank=True, null=True)
+    expires_at = models.DateTimeField()  # UTC
+    raw = models.JSONField(default=dict, blank=True)  # respuesta completa opcional
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"GoogleOAuth({self.user.email})"

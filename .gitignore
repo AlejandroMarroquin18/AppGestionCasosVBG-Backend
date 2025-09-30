@@ -12,3 +12,5 @@ comandos.txt
 /agenda/__pycache__/
 /quejas/__pycache__/
 __pycache__/
+cert.crt
+cert.key
