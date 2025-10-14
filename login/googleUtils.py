@@ -6,35 +6,33 @@ from django.utils import timezone
 
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 
-def exchange_code_for_tokens(server_auth_code: str, isAndroid:bool=False) -> dict:
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+def exchange_code_for_tokens(server_auth_code: str, isAndroid: bool = False) -> dict:
     """
-    Intercambia server_auth_code por access_token y refresh_token.s
+    Intercambia server_auth_code por access_token y refresh_token.
     Usa el CLIENTE WEB de GCP.
     """
-    
     data = {
         "code": server_auth_code,
-        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_id": settings.GOOGLE_CLIENT_ID,  # debe ser el CLIENTE WEB
         "client_secret": settings.GOOGLE_CLIENT_SECRET,
         "grant_type": "authorization_code",
-        # Para serverAuthCode de Google Sign-In se suele usar este redirect_uri especial:
-        "redirect_uri": "postmessage",
+        "redirect_uri": "postmessage",  # obligatorio para flujo popup SPA
     }
+
     if isAndroid:
-        data = {
-        "code": server_auth_code,
-        "client_id": settings.GOOGLE_CLIENT_ID,
-        "client_secret": settings.GOOGLE_CLIENT_SECRET,
-        "grant_type": "authorization_code",
-        # Para serverAuthCode de Google Sign-In se suele usar este redirect_uri especial:
-        }
+        # Usa la redirect_uri registrada para tu app Android
+        data["redirect_uri"] = "com.tuapp:/oauth2redirect"
 
-    
+    print("Payload enviado a Google:", data)
+
     r = requests.post(GOOGLE_TOKEN_URL, data=data, timeout=15)
-
     print("GOOGLE RESPONSE:", r.status_code, r.text)
+
     r.raise_for_status()
     return r.json()
+
 
 def refresh_access_token(refresh_token: str) -> dict:
     data = {
