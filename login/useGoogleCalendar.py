@@ -228,6 +228,8 @@ API_URL = "https://www.googleapis.com/calendar/v3"
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def fetch_events(request, year):
+
+   
     if not year:
         return Response({"error": "Year parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,7 +1,6 @@
 # quejas/views.py
 import re
 from django.http import JsonResponse
-from .models import Queja
 from .serializers import QuejaSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,8 +8,9 @@ from rest_framework import status
 from django.db.models import Count
 from datetime import datetime
 from rest_framework import viewsets
-from .models import Queja
 from .serializers import QuejaSerializer
+from datetime import timedelta
+from .models import Queja, CambioEstado, HistorialQueja
 
 
 
@@ -37,6 +37,10 @@ class QuejaViewSet(viewsets.ModelViewSet):
                 filters[param] = value
         
         return queryset.filter(**filters)
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        instance._user = self.request.user  # 👈 pasa el usuario a la señal
+        serializer.save()
     
     ####Essto se añade para que al crear una queja, el estado se establezca en 'pendiente' por defecto, ye
     def create(self, request, *args, **kwargs):
@@ -131,6 +135,92 @@ def statistics(request):
         .order_by('-total')
     )
 
+
+
+    ####Tiempo promedio de respuesta a denuncias por parte de las autoridades de la IES.
+    estados_finales = ['Atendida', 'Cerrada', 'Resuelta']  # puedes ajustar esto
+        
+    total_tiempo = timedelta()
+    contador = 0
+
+    for queja in Queja.objects.all():
+        if not queja.fecha_recepcion:
+            continue
+
+        primer_cambio = (
+            CambioEstado.objects
+            .filter(queja_id=queja, nuevo_estado__in=estados_finales)
+            .order_by('fecha')
+            .first()
+        )
+
+        if primer_cambio:
+            diferencia = primer_cambio.fecha - queja.fecha_recepcion
+            total_tiempo += diferencia
+            contador += 1
+
+    if contador == 0:
+        contador = 1  # para evitar división por cero
+
+    promedio = total_tiempo / contador
+
+    avgResponseTime = {
+        "tiempo_promedio_dias": promedio.days,
+        "tiempo_promedio_horas": round(promedio.total_seconds() / 3600, 2),
+        "detalle": str(promedio)
+    }
+
+
+    ####Número de víctimas que reciben acompañamiento psicológico y/o jurídico tras una denuncia de DyVBG.
+
+    # Filtramos todos los registros de acompañamiento
+    acompanamientos = HistorialQueja.objects.filter(tipo__in=['Psicológico', 'Jurídico'])
+
+    # Usamos un set para contar víctimas únicas por queja
+    victimas_psicologico = set()
+    victimas_juridico = set()
+
+    for hist in acompanamientos:
+        if hist.tipo == 'Psicológico' and hist.queja_id and hist.queja_id.afectado_nombre:
+            victimas_psicologico.add(hist.queja_id.id)
+        if hist.tipo == 'Jurídico' and hist.queja_id and hist.queja_id.afectado_nombre:
+            victimas_juridico.add(hist.queja_id.id)
+
+    total_acompanamientos = {
+        "total_victimas_psicologico": len(victimas_psicologico),
+        "total_victimas_juridico": len(victimas_juridico),
+        "total_victimas_ambos": len(victimas_psicologico.union(victimas_juridico))
+    }
+
+
+    ###Tasa de reincidencia de agresores dentro de la institución.
+
+    # Excluir registros sin nombre de agresor
+    agresores = (
+        Queja.objects
+        .exclude(agresor_nombre__isnull=True)
+        .exclude(agresor_nombre__exact="")
+        .values('agresor_nombre')
+        .annotate(num_quejas=Count('id'))
+    )
+
+    total_agresores = agresores.count()
+    agresores_reincidentes = agresores.filter(num_quejas__gt=1).count()
+
+    tasa_reincidencia = 0
+    if total_agresores > 0:
+        tasa_reincidencia = (agresores_reincidentes / total_agresores) * 100
+
+    tasa_reincidencia = {
+        "total_agresores_unicos": total_agresores,
+        "agresores_reincidentes": agresores_reincidentes,
+        "tasa_reincidencia_porcentaje": round(tasa_reincidencia, 2),
+    }
+
+
+
+
+
     '''
     Vicerrectoría Académica
     Vicerrectoría Administrativa
@@ -157,6 +247,9 @@ def statistics(request):
         
         'conteo_por_vicerrectoria_adscrita_afectado': list(vicerrectorias),
         'conteo_por_genero_afectado': list(generos),
+        'tiempo_promedio_respuessta': avgResponseTime,
+        'total_acompanamientos': total_acompanamientos,
+        'tasa_reincidencia':tasa_reincidencia,
     })
 
 

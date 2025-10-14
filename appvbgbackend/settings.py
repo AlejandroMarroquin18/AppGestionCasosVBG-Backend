@@ -90,7 +90,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'login',
     'corsheaders',
-    'quejas',
+    ##'quejas', usar esta si la de abajo se rompe
+    'quejas.apps.QuejasConfig',
     'talleres',
     'participantes',
     'agenda',

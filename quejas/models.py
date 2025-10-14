@@ -1,4 +1,7 @@
 from django.db import models
+from login.models import Usuarios
+from django.conf import settings
+
 
 class Queja(models.Model):
     
@@ -76,5 +79,23 @@ class HistorialQueja(models.Model):
     queja_id = models.ForeignKey(Queja, related_name='historial_estados', on_delete=models.SET_NULL,null=True)
     descripcion= models.CharField(max_length=300, blank=True)
     tipo= models.CharField(max_length=50, blank=True)
+    numero= models.IntegerField(editable=False, null=True, blank=True)
+    def save(self, *args, **kwargs):
+        if self.numero is None:  # solo al crear
+            ultimo = HistorialQueja.objects.filter(queja_id=self.queja_id).order_by("-numero").first()
+            if ultimo and ultimo.numero:
+                self.numero = ultimo.numero + 1
+            else:
+                self.numero = 1
+        super().save(*args, **kwargs)
     def __str__(self):
         return f"ID: {self.id} - Fecha: {self.fecha}"
+    
+class CambioEstado(models.Model):
+    queja_id = models.ForeignKey(Queja, related_name='cambios_estado', on_delete=models.SET_NULL,null=True)
+    fecha= models.DateTimeField(auto_now_add=True)
+    estado_anterior= models.CharField(max_length=30, blank=False)
+    nuevo_estado= models.CharField(max_length=30, blank=False)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    def __str__(self):
+        return f"De {self.estado_anterior} a {self.nuevo_estado}"

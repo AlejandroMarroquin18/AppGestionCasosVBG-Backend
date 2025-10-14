@@ -32,7 +32,7 @@ def exchange_code_for_tokens(server_auth_code: str, isAndroid:bool=False) -> dic
     
     r = requests.post(GOOGLE_TOKEN_URL, data=data, timeout=15)
 
-    #print("GOOGLE RESPONSE:", r.status_code, r.text)
+    print("GOOGLE RESPONSE:", r.status_code, r.text)
     r.raise_for_status()
     return r.json()
 
@@ -44,6 +44,7 @@ def refresh_access_token(refresh_token: str) -> dict:
         "refresh_token": refresh_token,
     }
     r = requests.post(GOOGLE_TOKEN_URL, data=data, timeout=15)
+    print("GOOGLE REFRESH RESPONSE:", r.status_code, r.text)
     
     r.raise_for_status()
     return r.json()

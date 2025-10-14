@@ -287,18 +287,7 @@ def logout_view(request):
     print("Usuario autenticado:", request)  # 🔥 Debería mostrar el usuario
     #quitar en produccion y dejar solo logout(request)
     try:
-        authorization_header = request.headers.get('Authorization')
-
-        if not authorization_header or not authorization_header.startswith('Bearer '):
-            return Response({
-                'error': 'Header Authorization requerido con formato: Bearer <token>'
-            }, status=400)
-        
-        # Extraer el token
-        token_string = authorization_header.split(' ')[1]
-        
-        # Identificar usuario manualmente
-        user = identificar_usuario_por_token_string(token_string)
+        user=request.user
         
         if user:
             token = Token.objects.get(user=user)
@@ -431,6 +420,7 @@ def check_session(request):
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def check_session(request):
     try:
         '''authorization_header = request.headers.get('Authorization')
@@ -464,6 +454,7 @@ def check_session(request):
         #print("ERROR: Header de token presente pero token no existe en BD")
     
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def authorize_google_access(request):
     ##user=request.user
