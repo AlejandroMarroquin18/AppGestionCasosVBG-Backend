@@ -12,6 +12,8 @@ from .serializers import QuejaSerializer
 from datetime import timedelta
 from .models import Queja, CambioEstado, HistorialQueja
 
+import pandas as pd
+
 
 
 @api_view(['GET'])
@@ -215,10 +217,12 @@ def statistics(request):
         "total_agresores_unicos": total_agresores,
         "agresores_reincidentes": agresores_reincidentes,
         "tasa_reincidencia_porcentaje": round(tasa_reincidencia, 2),
-    }
+    }    
 
-
-
+    
+    variacion_denuncias_resueltas_mensual = variacion_denuncias_resueltas('mensual')
+    variacion_denuncias_resueltas_semestral = variacion_denuncias_resueltas('semestral')
+    variacion_denuncias_resueltas_anual = variacion_denuncias_resueltas('anual')
 
 
     '''
@@ -250,9 +254,54 @@ def statistics(request):
         'tiempo_promedio_respuessta': avgResponseTime,
         'total_acompanamientos': total_acompanamientos,
         'tasa_reincidencia':tasa_reincidencia,
+        'variacion_denuncias_resueltas_mensual': variacion_denuncias_resueltas_mensual,
+        'variacion_denuncias_resueltas_semestral': variacion_denuncias_resueltas_semestral,
+        'variacion_denuncias_resueltas_anual': variacion_denuncias_resueltas_anual
     })
 
 
 
 
 
+def variacion_denuncias_resueltas(periodo='mensual'):
+    """
+    Retorna la variación en la cantidad de denuncias resueltas
+    por periodo (mensual, semestral o anual).
+    """
+    
+    if periodo not in ['mensual', 'semestral', 'anual']:
+        return {"error": "Periodo inválido. Usa mensual, semestral o anual."}
+
+    # Convertir las fechas (porque es un CharField)
+    quejas = Queja.objects.filter(estado__iexact="Resuelta").exclude(fecha_recepcion__exact='')
+    data = []
+    for q in quejas:
+        try:
+            fecha = datetime.strptime(q.fecha_recepcion, "%Y-%m-%d")
+            data.append({'fecha': fecha})
+        except ValueError:
+            continue  # ignorar si no tiene formato correcto
+
+    if not data:
+        return {"detalle": "No hay denuncias resueltas con fecha válida."}
+
+    df = pd.DataFrame(data)
+
+    # Agrupar según el periodo
+    if periodo == "mensual":
+        df['periodo'] = df['fecha'].dt.to_period('M').astype(str)
+    elif periodo == "anual":
+        df['periodo'] = df['fecha'].dt.year
+    elif periodo == "semestral":
+        df['periodo'] = df['fecha'].apply(lambda f: f"{f.year}-S{1 if f.month <= 6 else 2}")
+
+    # Contar cuántas hay por periodo
+    conteo = df.groupby('periodo').size().reset_index(name='cantidad').sort_values('periodo')
+
+    # Calcular variación porcentual entre periodos consecutivos
+    conteo['variacion_%'] = conteo['cantidad'].pct_change() * 100
+    conteo['variacion_%'] = conteo['variacion_%'].fillna(0).round(2)
+
+    resultado = conteo.to_dict(orient='records')
+
+    return resultado
