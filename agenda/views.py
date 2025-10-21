@@ -9,6 +9,7 @@ from quejas.models import Queja
 from django.db.models import Count, Max
 from django.http import JsonResponse
 from django.db.models.functions import ExtractYear, ExtractMonth
+from utils.decorators import rol_required
 
 
 # Listar todos los eventos o crear uno nuevo
@@ -56,7 +57,8 @@ def event_detail(request, pk):
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+@api_view(['GET'])
+@rol_required('admin', 'staff', 'developer')
 def eventos_stats(request):
     # Totales por status
     total_creados = Event.objects.filter(status="Creado").count()
@@ -115,7 +117,6 @@ def eventos_stats(request):
         .annotate(total=Count("id"))
         .order_by("month")
     )
-
 
     return JsonResponse({
         "total_eventos_creados": total_creados,

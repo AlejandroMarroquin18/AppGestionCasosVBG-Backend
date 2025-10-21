@@ -7,17 +7,32 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Count
 from datetime import datetime
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .serializers import QuejaSerializer
 from datetime import timedelta
 from .models import Queja, CambioEstado, HistorialQueja
+from django.core.mail import send_mail
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import permission_classes
+from django.core.mail import EmailMultiAlternatives
+from appvbgbackend import settings
+from django.db.models import Q
+from rest_framework.exceptions import PermissionDenied
+from utils.decorators import rol_required
+
+
+
 
 import pandas as pd
 
 
 
 @api_view(['GET'])
+@rol_required('admin', 'staff', 'developer')
 def lista_quejas(request):
+    print("jsjsjsj")
     if request.method == 'GET':
         quejas = Queja.objects.all()
         serializer = QuejaSerializer(quejas, many=True)
@@ -29,7 +44,22 @@ class QuejaViewSet(viewsets.ModelViewSet):
     queryset = Queja.objects.all()  # Recupera todas las quejas
     serializer_class = QuejaSerializer  # Usa el serializer para validar datos
     def get_queryset(self):
+
+        user = self.request.user
+        print("user making request:", user)
+        if not user:
+            return Queja.objects.none()  # Si no hay usuario, no devolver nada
+        
+
         queryset = Queja.objects.all()
+
+        # Si el usuario es "visitor", solo puede ver sus propias quejas
+        print("user role:", user.rol)
+        if user.rol == "visitor":
+            queryset = queryset.filter(
+                Q(afectado_correo=user) | Q(reporta_correo=user.email)
+            )
+
         query_params = self.request.query_params
 
         # Recorrer todos los parámetros y aplicarlos como filtros dinámicos
@@ -39,11 +69,46 @@ class QuejaViewSet(viewsets.ModelViewSet):
                 filters[param] = value
         
         return queryset.filter(**filters)
+    
     def perform_update(self, serializer):
         instance = self.get_object()
+        user= self.request.user
+        if user.rol == "visitor":
+            raise PermissionDenied("No tienes permiso para modificar esta queja.")
+
         instance._user = self.request.user  # 👈 pasa el usuario a la señal
         serializer.save()
     
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+
+        # Evitar que un visitor borre quejas que no le pertenecen
+        if user.rol == "visitor":
+            
+            raise PermissionDenied("No tienes permiso para eliminar esta queja.")
+
+        return super().destroy(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        # Evitar que un visitor consulte una queja que no le pertenece
+        if user.rol == "visitor":
+            if instance.afectado_correo != user.email and instance.reporta_correo != user.email:
+                raise PermissionDenied("No tienes permiso para ver esta queja.")
+
+        return super().retrieve(request, *args, **kwargs)
+
+    def get_permissions(self):
+        # Si la acción es 'create' (POST), permitir acceso sin autenticación
+        if self.action == 'create':
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
     ####Essto se añade para que al crear una queja, el estado se establezca en 'pendiente' por defecto, ye
     def create(self, request, *args, **kwargs):
          # Copia mutable de los datos recibidos
@@ -56,6 +121,117 @@ class QuejaViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
+        # Enviar correo de notificación
+        subject = "Nueva Queja Registrada"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color:#444;">📢 Nueva queja registrada</h2>
+
+            <p>Se ha registrado una nueva queja en la plataforma.</p>
+
+            <p><strong>Detalles de la queja:</strong></p>
+            <ul>
+                <li><strong>ID:</strong> {serializer.data['id']}</li>
+                <li><strong>Fecha de recepción:</strong> {serializer.data['fecha_recepcion']}</li>
+                <li><strong>Estado actual:</strong> {serializer.data['estado']}</li>
+                <li><strong>Registrada por:</strong> {serializer.data['reporta_nombre']}</li>
+            </ul>
+
+            <p>Le recomendamos ingresar al panel administrativo para revisar los detalles y asignar seguimiento.</p>
+
+            <p>
+                <a href="{getattr(settings, 'BACKEND_URL', '#')}" 
+                style="background-color:#007bff;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
+                Ir al panel
+                </a>
+            </p>
+
+            <br>
+            <p>Atentamente,<br>
+            <strong>Plataforma para la gestión de atención de violencias basadas en género</strong><br>
+            </p>
+        </body>
+        </html>
+        """
+
+        
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=html_content,
+            from_email=getattr(settings, "CORREO_AREA_VBG", settings.DEFAULT_FROM_EMAIL),
+            to=[settings.CORREO_AREA_VBG],  # Cambia esto por el correo del área de VBG
+        )
+        email.attach_alternative(html_content, "text/html")
+
+        try:
+            email.send(fail_silently=False)
+        except Exception as e:
+            print(f"Error al enviar correo: {e}")
+        #send_mail(asunto, mensaje,remitente,destinatario)
+
+        # Enviar correo de notificación al afectado y al reportante (si aplica)
+        subject = "Confirmación de registro de queja"
+
+        # Construcción del contenido del correo
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color:#444;">📢 Su queja ha sido registrada exitosamente</h2>
+
+            <p>Su queja ha sido recibida por la plataforma y será atendida por el equipo correspondiente.</p>
+
+            <p><strong>Detalles de la queja registrada:</strong></p>
+            <ul>
+                <li><strong>ID:</strong> {serializer.data['id']}</li>
+                <li><strong>Fecha de recepción:</strong> {data.get('fecha_recepcion', 'No especificada')}</li>
+                <li><strong>Estado actual:</strong> {data.get('estado', 'No especificado')}</li>
+                <li><strong>Registrada por:</strong> {data.get('reporta_nombre', 'No especificado')}</li>
+            </ul>
+
+            <p>Nos comunicaremos con usted si se requiere información adicional o para informarle sobre el avance del caso.</p>
+
+            <br>
+            <p>Atentamente,<br>
+            <strong>Plataforma para la gestión de atención de violencias basadas en género</strong><br>
+            </p>
+        </body>
+        </html>
+        """
+
+        
+
+        # Determinar destinatarios (evitando errores si los campos no existen)
+        destinatarios = []
+
+        afectado_correo = data.get('afectado_correo')
+        reporta_correo = data.get('reporta_correo')
+
+        if afectado_correo:
+            destinatarios.append(afectado_correo)
+        if reporta_correo:
+            destinatarios.append(reporta_correo)
+
+        # Asegurar que haya destinatarios válidos
+        if destinatarios:
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=html_content,
+                from_email=getattr(settings, "CORREO_AREA_VBG", settings.DEFAULT_FROM_EMAIL),
+                to=destinatarios,  # Se envía a ambos si existen
+            )
+            email.attach_alternative(html_content, "text/html")
+
+            try:
+                email.send(fail_silently=False)
+                print(f"Correo enviado correctamente a: {', '.join(destinatarios)}")
+            except Exception as e:
+                print(f"Error al enviar correo a usuario(s): {e}")
+        else:
+            print("No se encontraron correos en afectado_correo o reporta_correo.")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
@@ -64,6 +240,7 @@ def validar_case_id(request, case_id):
     return Response({"exists": existe}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@rol_required('admin', 'staff', 'developer')
 def statistics(request):
     conteo_por_anio = {}
     conteo_por_mes = {}

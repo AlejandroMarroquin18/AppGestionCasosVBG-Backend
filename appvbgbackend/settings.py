@@ -21,6 +21,8 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = "postmessage"
 
+CORREO_AREA_VBG = os.getenv("CORREO_AREA_VBG")
+
 
 ##Manejo de Cookies
 SESSION_COOKIE_SAMESITE = 'None'
@@ -54,6 +56,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000", 
     "https://127s.0.0.1:3000",
 ]
+BACKEND_URL = "http://localhost:8000"
 
 
 
@@ -112,7 +115,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     
     'DEFAULT_PARSER_CLASSES': [
@@ -179,7 +182,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # Proveedor SMTP, como Gmail (smtp.gmail.com)
 EMAIL_PORT = 587  # Generalmente es 587 para conexiones seguras
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'dawntest90@gmail.com'  # Tu correo electrónico
-EMAIL_HOST_PASSWORD = 'brxz cals xvjk zhvh'  # Tu contrasena
+EMAIL_HOST_PASSWORD = 'cxfs kjll amud yrqq'  # Tu contrasena
 DEFAULT_FROM_EMAIL = 'dawntest90@gmail.com'
 
 # Password validation

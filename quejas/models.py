@@ -22,7 +22,7 @@ class Queja(models.Model):
     reporta_facultad= models.CharField(max_length=30, blank=True)
     reporta_sede= models.CharField(max_length=30, blank=True)
     reporta_celular= models.CharField(max_length=30, blank=True)
-    reporta_correo= models.CharField(max_length=30, blank=True)
+    reporta_correo= models.EmailField( blank=True)
     #Datos de la persona afectada
     afectado_nombre= models.CharField(max_length=30, blank=True)
     afectado_sexo= models.CharField(max_length=30, blank=True)
@@ -42,7 +42,7 @@ class Queja(models.Model):
     afectado_facultad= models.CharField(max_length=30, blank=True)
     afectado_sede= models.CharField(max_length=30, blank=True)
     afectado_celular= models.CharField(max_length=30, blank=True)
-    afectado_correo= models.CharField(max_length=30, blank=True)
+    afectado_correo= models.EmailField(blank=True)
     afectado_tipo_vbg_os= models.CharField(max_length=30, blank=True)
     afectado_detalles_caso= models.CharField(max_length=30, blank=True)
     #datos de la persona agresora

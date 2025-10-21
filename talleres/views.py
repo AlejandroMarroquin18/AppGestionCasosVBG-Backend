@@ -10,8 +10,13 @@ from django.shortcuts import get_object_or_404
 from .models import Workshop
 from django.db.models import Count, Avg, F
 from django.core.mail import send_mail
+from utils.decorators import rol_required
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 @api_view(['GET', 'POST'])
+@rol_required('admin', 'staff', 'developer')  # Solo usuarios con estos roles pueden acceder
 def workshop_list(request):
     if request.method == 'GET':
         # Obtener todos los talleres
@@ -34,6 +39,7 @@ def workshop_list(request):
             return Response({"message": "Datos inválidos", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'DELETE', 'PATCH'])  # Agregado PATCH
+@rol_required('admin', 'staff', 'developer')
 def workshop_detail(request, pk):
     workshop = get_object_or_404(Workshop, pk=pk)
     if request.method == 'GET':
@@ -86,6 +92,8 @@ def workshop_detail(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def register_participant(request, workshop_id):
     # Verificamos que el taller exista
     workshop = get_object_or_404(Workshop, pk=workshop_id)
@@ -100,6 +108,7 @@ def register_participant(request, workshop_id):
 
 
 @api_view(['GET'])
+@rol_required('admin', 'staff', 'developer')
 def statistics(request):
     # Número total de talleres
     total_workshops = Workshop.objects.count()

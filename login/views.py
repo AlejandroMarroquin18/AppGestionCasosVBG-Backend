@@ -41,31 +41,43 @@ def login_view(request):
         return Response({"error": "Invalid Password"}, status=status.HTTP_401_UNAUTHORIZED)
     token, created = Token.objects.get_or_create(user=user)
     serializer = UserSerializer(instance=user)
+    #login(request, user)  # Iniciar sesión en Django
     
     return Response({"token":token.key,"user": serializer.data},status.HTTP_200_OK)
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def register_view(request):
+    data = request.data.copy()
+    data['username'] = data.get('email', '').split('@')[0]
+    serializer = UserSerializer(data=data)
     
-    serializer=UserSerializer(data=request.data)
 
-    if not request.data.get['password']:
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    # Verificar si viene el password
+    if not request.data.get('password'):
+        return Response({'error': 'La contraseña es obligatoria.'}, status=status.HTTP_400_BAD_REQUEST)
 
     if serializer.is_valid():
+        # Guardar el usuario (rol será asignado dentro del serializer)
         serializer.save()
+        
         user = Usuarios.objects.get(email=serializer.data['email'])
         user.set_password(request.data['password'])
         user.save()
-        token = Token.objects.create(user=user)
-        return Response({'token':token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        token = Token.objects.create(user=user)
+        return Response({'token': token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def forgottenPassword_view(request):
     
     emailrequest=request.data.get('email')
@@ -102,6 +114,8 @@ def forgottenPassword_view(request):
 
     
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def confirmForgottenPasswordCode_view(request):
     ##Que se ingrese este codigo y verifique si fue generado por este correo y
     
@@ -115,6 +129,8 @@ def confirmForgottenPasswordCode_view(request):
 
     
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def changeForgottenPassword_view(request):
     #Recibe la solicitud de cambio de contraseña
     print(request.data)
@@ -140,6 +156,7 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def googleAuth(request):
     """
@@ -176,6 +193,8 @@ def googleAuth(request):
         user_data = google_response.json()
         email = user_data.get('email')
         name = user_data.get('name', '')
+        username = email.split('@')[0]
+
 
         if not email:
             return Response({"error": "No se pudo obtener el correo del usuario."}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,7 +202,8 @@ def googleAuth(request):
         # 3. Crear o recuperar usuario en la base de datos
         user, created = Usuarios.objects.get_or_create(email=email, defaults={
             "nombre": name, 
-            "rol": "visitor"
+            "rol": "visitor",
+            "username": username
             })
 
         # 4. Guardar credenciales en GoogleOAuth
@@ -211,7 +231,7 @@ def googleAuth(request):
         }, status=status.HTTP_200_OK)
         
 
-        ##login(request, user)  # Iniciar sesión en Django En produccion
+        #login(request, user)  # Iniciar sesión en Django En produccion
         
 
         '''# Crear token interno de la API (DRF Token)
@@ -251,32 +271,7 @@ def googleAuth(request):
 
 
 
-'''Produccion
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def logout_view(request):
-    print("✅ Cookies recibidas:", request.COOKIES)  # 🔥 Ver cookies
-    print("✅ Headers recibidos:", request.headers)  # 🔥 Ver headers
-    print("✅ Usuario autenticado:", request.user)  # 🔥 Ver usuario
-    print("Usuario autenticado:", request)  # 🔥 Debería mostrar el usuario
-    logout(request)
-    print("Después del logout, usuario:", request.user)  # 🔥 Debería estar vacío
-    # 🔥 Elimina las cookies de sesión y CSRF
-    response = Response({"message": "Sesión cerrada correctamente"}, status=200)
-    #response.delete_cookie("access_token")
-    #response.delete_cookie("refresh_token")
-    response.delete_cookie("csrftoken")
-     # 🔥 Eliminar todas las cookies relacionadas con autenticación
-    response.delete_cookie("sessionid", path="/")
-    response.delete_cookie("csrftoken", path="/")
-    #response.delete_cookie("access_token", path="/")
-    #response.delete_cookie("refresh_token", path="/")
 
-    #quitar en produccion y dejar solo logout(request)
-    token = Token.objects.get(user=request.user)
-    token.delete()
-
-    return response'''
 @api_view(["POST"])##dev
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -292,6 +287,7 @@ def logout_view(request):
         if user:
             token = Token.objects.get(user=user)
             token.delete()
+            #logout(request)  # Cierra la sesión en Django
             return Response({"message": "Sesión cerrada correctamente"}, status=200)
         else:
             return Response({"error": "Token inválido o usuario no encontrado"}, status=400)
@@ -319,6 +315,8 @@ def test_csrf(request):
 GOOGLE_ANDROID_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")  # del Cloud Console
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def android_auth(request):
     
     """
@@ -346,12 +344,12 @@ def android_auth(request):
 
         user, created = Usuarios.objects.get_or_create(
             email=email,
-            defaults={"nombre": name, "rol": "developer"}
+            defaults={"nombre": name, "rol": "visitor", "username": email.split('@')[0]}
         )
 
         # Si el cliente envía server_auth_code, canjeamos por tokens de Google
         if server_auth_code:
-            data = exchange_code_for_tokens(server_auth_code)
+            data = exchange_code_for_tokens(server_auth_code,True)
             access_token = data["access_token"]
             expires_in = data.get("expires_in", 3600)
             refresh_token = data.get("refresh_token")  # puede venir solo la primera vez
@@ -372,13 +370,14 @@ def android_auth(request):
 
         # Token interno del backend (DRF)
         token, _ = Token.objects.get_or_create(user=user)
+        #login(request, user)  # Iniciar sesión en Django
 
         return Response({
             "token": token.key,
             "user": {"email": user.email, "nombre": user.nombre, "rol":user.rol},
             "is_new_user": created,
             "google_calendar_linked": bool(getattr(user, "google_oauth", None))
-        })
+        },status=status.HTTP_200_OK)
 
     except ValueError:
         return Response({"error": "El id_token no es válido o expiró."}, status=status.HTTP_400_BAD_REQUEST)
@@ -437,6 +436,7 @@ def check_session(request):
         # Identificar usuario manualmente
         #user = identificar_usuario_por_token_string(token_string)
         user=request.user
+        print("Usuario autenticado en check_session:", user)
         return Response({
             "is_authenticated": user is not None,
             "user": {
