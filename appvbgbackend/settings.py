@@ -48,13 +48,15 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
+    "https://dtweetsjnyccweomsrvf.supabase.co",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://localhost:3000", 
-    "https://127s.0.0.1:3000",
+    "https://127.0.0.1:3000",
+    "https://dtweetsjnyccweomsrvf.supabase.co",
 ]
 BACKEND_URL = "http://localhost:8000"
 
@@ -76,7 +78,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -162,16 +164,34 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#       'NAME': 'vbgdb',  # Nombre de tu base de datos
+#       'USER': 'postgres',                  # Usuario de PostgreSQL
+#       'PASSWORD': 'invitado',           # Contraseña del usuario
+#       'HOST': 'localhost',                  # Si está en el mismo equipo
+#      'PORT': '5432',                        # Puerto por defecto de PostgreSQL
+#    }   
+#}
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vbgdb',  # Nombre de tu base de datos
-        'USER': 'postgres',                  # Usuario de PostgreSQL
-        'PASSWORD': 'invitado',           # Contraseña del usuario
-        'HOST': 'localhost',                  # Si está en el mismo equipo
-        'PORT': '5432',                        # Puerto por defecto de PostgreSQL
+        'NAME': os.getenv('DB_NAME', 'postgres'),
+        'USER': os.getenv('DB_USER', 'postgres.dtweetsjnyccweomsrvf'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'aws-1-us-east-1.pooler.supabase.com'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+        'CONN_MAX_AGE': 600,
+        'DISABLE_SERVER_SIDE_CURSORS': True,
     }
-    
 }
 
 
@@ -220,6 +240,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

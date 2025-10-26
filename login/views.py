@@ -54,9 +54,8 @@ def register_view(request):
     serializer = UserSerializer(data=data)
     
 
-    # Verificar si viene el password
     if not request.data.get('password'):
-        return Response({'error': 'La contraseña es obligatoria.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
     if serializer.is_valid():
         # Guardar el usuario (rol será asignado dentro del serializer)
