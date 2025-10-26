@@ -1,6 +1,6 @@
-from django.urls import include, path
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('api/talleres/', include('talleres.urls')),
-    path('api/participantes/', include('participantes.urls')),
+    path('talleres/inscripcion/<int:workshop_id>/', views.register_participant, name='register_participant'),
 ]

@@ -49,7 +49,7 @@ def register_view(request):
     
     serializer=UserSerializer(data=request.data)
 
-    if not request.data.get['password']:
+    if not request.data.get('password'):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
     if serializer.is_valid():
