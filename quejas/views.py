@@ -21,6 +21,7 @@ from appvbgbackend import settings
 from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied
 from utils.decorators import rol_required
+from collections import Counter
 
 
 
@@ -314,6 +315,46 @@ def statistics(request):
         .order_by('-total')
     )
 
+    edades = (
+        Queja.objects
+        .values('afectado_edad')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    comunas = (
+        Queja.objects
+        .values('afectado_comuna')  
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    
+    conteoTipoVBG = Counter()
+
+    for q in Queja.objects.values_list("afectado_tipo_vbg_os", flat=True):
+        if q:
+            tipos = [t.strip().lower() for t in q.split(",") if t.strip()]
+            conteoTipoVBG.update(tipos)
+
+    '''tipo_vbg = (
+        Queja.objects
+        .values('afectado_tipo_vbg_os')  
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )'''
+
+    conteoFactoresRiesgo = Counter()
+    for q in Queja.objects.values_list("agresor_factores_riesgo", flat=True):
+        if q:
+            tipos = [t.strip().lower() for t in q.split(",") if t.strip()]
+            conteoFactoresRiesgo.update(tipos)
+
+    '''factores_riesgo = (
+        Queja.objects
+        .values('agresor_factores_riesgo')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )'''
+
 
 
     ####Tiempo promedio de respuesta a denuncias por parte de las autoridades de la IES.
@@ -400,7 +441,8 @@ def statistics(request):
     variacion_denuncias_resueltas_mensual = variacion_denuncias_resueltas('mensual')
     variacion_denuncias_resueltas_semestral = variacion_denuncias_resueltas('semestral')
     variacion_denuncias_resueltas_anual = variacion_denuncias_resueltas('anual')
-
+    print (dict(conteoTipoVBG))
+    print (dict(conteoFactoresRiesgo))
 
     '''
     Vicerrectoría Académica
@@ -410,6 +452,11 @@ def statistics(request):
     Vicerrectoría de Regionalización
     Vicerrectoría de Extensión y Proyección Social '''
     return Response({
+        'edades': list(edades),
+        'comunas': list(comunas),
+        'tipo_vbg': dict(conteoTipoVBG),
+        'factores_riesgo': dict(conteoFactoresRiesgo),
+
         'conteo_por_anio': conteo_por_anio,
         'conteo_por_mes': conteo_por_mes,
 

@@ -22,6 +22,7 @@ class Workshop(models.Model):
     location = models.CharField(max_length=255)
     modality = models.CharField(max_length=10, choices=(('presencial', 'Presencial'), ('virtual', 'Virtual')))
     slots = models.IntegerField()
+    sede = models.CharField(max_length=100, blank=True, null=True)
     facilitators = models.ManyToManyField(Facilitator)  # Relación muchos a muchos
     qr_code_url = models.URLField(max_length=255, null=True, blank=True)
 

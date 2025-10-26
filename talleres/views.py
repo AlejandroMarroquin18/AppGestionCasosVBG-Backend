@@ -126,10 +126,18 @@ def statistics(request):
     # Porcentaje de participantes por género
     gender_stats = Participant.objects.values('gender_identity').annotate(count=Count('id'))
 
+    sede = Participant.objects.values('sede').annotate(count=Count('id'))
+
+    discapacidad = Participant.objects.values('discapacidad').annotate(count=Count('id'))
+
+
+
     # Participantes por programa
     program_stats = Participant.objects.values('program').annotate(count=Count('id'))
 
     data = {
+        'sede': sede,
+        'disability': discapacidad,
         'total_workshops': total_workshops,
         'virtual_workshops': virtual_workshops,
         'in_person_workshops': in_person_workshops,
