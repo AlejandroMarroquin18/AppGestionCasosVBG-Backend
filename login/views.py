@@ -201,7 +201,7 @@ def googleAuth(request):
         # 3. Crear o recuperar usuario en la base de datos
         user, created = Usuarios.objects.get_or_create(email=email, defaults={
             "nombre": name, 
-            "rol": "visitor",
+            "rol": "developer",
             "username": username
             })
 
@@ -343,7 +343,7 @@ def android_auth(request):
 
         user, created = Usuarios.objects.get_or_create(
             email=email,
-            defaults={"nombre": name, "rol": "visitor", "username": email.split('@')[0]}
+            defaults={"nombre": name, "rol": "developer", "username": email.split('@')[0]}
         )
 
         # Si el cliente envía server_auth_code, canjeamos por tokens de Google
