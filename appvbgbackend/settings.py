@@ -47,6 +47,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
     "https://dtweetsjnyccweomsrvf.supabase.co",
+    "https://app-gestion-casos-vbg-frontend.vercel.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -55,6 +56,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
     "https://dtweetsjnyccweomsrvf.supabase.co",
+    "https://app-gestion-casos-vbg-frontend.vercel.app"
 ]
 
 
@@ -185,8 +187,9 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432'),
         'OPTIONS': {
             'sslmode': 'require',
+            'connect_timeout': 5,
         },
-        'CONN_MAX_AGE': 600,
+        'CONN_MAX_AGE': 180,
         'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
