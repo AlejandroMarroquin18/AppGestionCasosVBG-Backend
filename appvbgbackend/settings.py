@@ -194,6 +194,19 @@ DATABASES = {
     }
 }
 
+'''DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+       'NAME': 'vbgdb',  # Nombre de tu base de datos
+       'USER': 'postgres',                  # Usuario de PostgreSQL
+       'PASSWORD': 'invitado',           # Contraseña del usuario
+       'HOST': 'localhost',                  # Si está en el mismo equipo
+      'PORT': '5432',                        # Puerto por defecto de PostgreSQL
+    }   
+}
+
+'''
+
 
 #Email Data
 ###Ingresar los datos del correo
