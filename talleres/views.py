@@ -124,12 +124,12 @@ def statistics(request):
         average_participants = average_participants.get('avg') or 0
 
         gender_stats = list(Participant.objects.values('gender_identity').annotate(count=Count('id')))
-        sede = list(Participant.objects.values('sede').annotate(count=Count('id')))
+        #sede = list(Participant.objects.values('sede').annotate(count=Count('id')))
         discapacidad = list(Participant.objects.values('discapacidad').annotate(count=Count('id')))
         program_stats = list(Participant.objects.values('program').annotate(count=Count('id')))
 
         data = {
-            'sede': sede,
+            #'sede': sede,
             'disability': discapacidad,
             'total_workshops': total_workshops,
             'virtual_workshops': virtual_workshops,
