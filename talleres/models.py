@@ -29,7 +29,7 @@ class Workshop(models.Model):
     def generate_qr_code(self):
         """Genera el QR en base64 sin guardar archivo físico"""
         # URL de inscripción pública (sin autenticación)
-        qr_url = f"http://localhost:3000/inscripcion/{self.id}"
+        qr_url = f"https://app-gestion-casos-vbg-frontend.vercel.app/inscripcion/{self.id}"
         self.qr_link = qr_url
         
         qr = qrcode.QRCode(
