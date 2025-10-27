@@ -95,6 +95,8 @@ def workshop_detail(request, pk):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def register_participant(request, workshop_id):
+    print("Workshop ID:", workshop_id)
+    print("Datos recibidos:", request.data)
     # Verificamos que el taller exista
     workshop = get_object_or_404(Workshop, pk=workshop_id)
 
