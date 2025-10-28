@@ -4,7 +4,6 @@ from .models import Queja, CambioEstado
 
 @receiver(pre_save, sender=Queja)
 def detectar_cambio_estado(sender, instance, **kwargs):
-    """Guarda el estado anterior antes de actualizar la queja."""
     if instance.pk:
         try:
             old_instance = Queja.objects.get(pk=instance.pk)
@@ -14,10 +13,8 @@ def detectar_cambio_estado(sender, instance, **kwargs):
     else:
         instance._estado_anterior = None
 
-
 @receiver(post_save, sender=Queja)
 def crear_cambio_estado(sender, instance, created, **kwargs):
-    """Crea un CambioEstado si el estado cambió."""
     if not created:
         estado_anterior = getattr(instance, "_estado_anterior", None)
         nuevo_estado = instance.estado
@@ -26,5 +23,5 @@ def crear_cambio_estado(sender, instance, created, **kwargs):
                 queja_id=instance,
                 estado_anterior=estado_anterior,
                 nuevo_estado=nuevo_estado,
-                usuario=getattr(instance, "_user", None),  # 👈 se asignará desde la vista
+                usuario=getattr(instance, "_user", None),
             )

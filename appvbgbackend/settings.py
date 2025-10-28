@@ -83,13 +83,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_+k%u()ao&t4_b#5rre#_igz_ozt$)s7k_k#skfdj#limw%77_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False  # Cambia a False en producción
+DEBUG = True  # Cambia a False en producción
 
 ALLOWED_HOSTS = [
     'appgestioncasosvbg-backend.onrender.com',
     'localhost',
     '127.0.0.1',
-    '.onrender.com'
+    '.onrender.com',
+    '192.168.20.58',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -191,7 +192,7 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -208,8 +209,8 @@ DATABASES = {
         'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
-
-'''DATABASES = {
+'''
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
        'NAME': 'vbgdb',  # Nombre de tu base de datos
@@ -220,7 +221,7 @@ DATABASES = {
     }   
 }
 
-'''
+
 
 
 #Email Data
