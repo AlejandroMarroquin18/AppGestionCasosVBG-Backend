@@ -95,6 +95,8 @@ def workshop_detail(request, pk):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def register_participant(request, workshop_id):
+    print("Workshop ID:", workshop_id)
+    print("Datos recibidos:", request.data)
     # Verificamos que el taller exista
     workshop = get_object_or_404(Workshop, pk=workshop_id)
 
@@ -110,41 +112,52 @@ def register_participant(request, workshop_id):
 @api_view(['GET'])
 @rol_required('admin', 'staff', 'developer')
 def statistics(request):
-    # Número total de talleres
-    total_workshops = Workshop.objects.count()
+    try:
+        # Número total de talleres
+        total_workshops = Workshop.objects.count()
 
-    # Talleres virtuales y presenciales
-    virtual_workshops = Workshop.objects.filter(modality='virtual').count()
-    in_person_workshops = total_workshops - virtual_workshops
+        # Talleres virtuales y presenciales
+        virtual_workshops = Workshop.objects.filter(modality='virtual').count()
+        in_person_workshops = total_workshops - virtual_workshops
 
-    # Participantes totales
-    total_participants = Participant.objects.count()
+        # Participantes totales
+        total_participants = Participant.objects.count()
 
-    # Participantes promedio por taller
-    average_participants = Participant.objects.values('workshop').annotate(count=Count('id')).aggregate(Avg('count'))
+        # Participantes promedio por taller
+        average_participants_data = (
+            Participant.objects.values('workshop')
+            .annotate(count=Count('id'))
+            .aggregate(avg=Avg('count'))
+        )
+        average_participants = average_participants_data.get('avg') or 0
 
-    # Porcentaje de participantes por género
-    gender_stats = Participant.objects.values('gender_identity').annotate(count=Count('id'))
+        # Estadísticas por género
+        gender_stats = list(Participant.objects.values('gender_identity').annotate(count=Count('id')))
 
-    sede = Participant.objects.values('sede').annotate(count=Count('id'))
+        # Estadísticas por programa
+        program_stats = list(Participant.objects.values('program').annotate(count=Count('id')))
 
-    discapacidad = Participant.objects.values('discapacidad').annotate(count=Count('id'))
+        # Estadísticas por discapacidad
+        disability_stats = list(Participant.objects.values('disability').annotate(count=Count('id')))
 
+        # Si quieres agregar más (por ejemplo, por rango de edad o autorreconocimiento)
+        # self_recognition_stats = list(Participant.objects.values('self_recognition').annotate(count=Count('id')))
 
+        data = {
+            'total_workshops': total_workshops,
+            'virtual_workshops': virtual_workshops,
+            'in_person_workshops': in_person_workshops,
+            'total_participants': total_participants,
+            'average_participants': average_participants,
+            'gender_stats': gender_stats,
+            'program_stats': program_stats,
+            'disability_stats': disability_stats,
+            # 'self_recognition_stats': self_recognition_stats,
+        }
 
-    # Participantes por programa
-    program_stats = Participant.objects.values('program').annotate(count=Count('id'))
+        return Response(data)
 
-    data = {
-        'sede': sede,
-        'disability': discapacidad,
-        'total_workshops': total_workshops,
-        'virtual_workshops': virtual_workshops,
-        'in_person_workshops': in_person_workshops,
-        'total_participants': total_participants,
-        'average_participants': average_participants.get('count__avg', 0),
-        'gender_stats': gender_stats,
-        'program_stats': program_stats  # Agregar estadísticas de programa
-    }
-
-    return Response(data)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)

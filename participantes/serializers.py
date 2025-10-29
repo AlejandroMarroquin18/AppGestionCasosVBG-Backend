@@ -8,5 +8,11 @@ class ParticipantSerializer(serializers.ModelSerializer):
             'id', 'workshop', 'email', 'full_name', 'document_type', 
             'document_number', 'age', 'disability', 
             'program', 'gender_identity', 'self_recognition', 
-            'institutional_email', 'terms_accepted'
+            'terms_accepted', 'created_at'
         ]
+        
+        extra_kwargs = {
+            'document_number': {'required': True},
+            'email': {'required': True},
+            'full_name': {'required': True},
+        }

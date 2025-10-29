@@ -13,7 +13,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'full_name', 'email', 'document_type', 'document_number', 
             'age', 'disability', 'program', 'gender_identity', 
-            'self_recognition', 'institutional_email', 'terms_accepted', 'created_at'
+            'self_recognition', 'terms_accepted', 'created_at'
         ]
 
 class WorkshopSerializer(serializers.ModelSerializer):

@@ -19,7 +19,8 @@ load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = "postmessage"
+#GOOGLE_REDIRECT_URI = "postmessage"
+GOOGLE_REDIRECT_URI = "https://app-gestion-casos-vbg-frontend.vercel.app"
 
 CORREO_AREA_VBG = os.getenv("CORREO_AREA_VBG")
 
@@ -43,20 +44,28 @@ SESSION_ENGINE = "django.contrib.sessions.backends.db"
 CORS_ALLOW_CREDENTIALS = True  # Permite el envío de cookies o tokens de autenticación
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # Asegúrate de incluirlo si usas CSRF
-    "http://127.0.0.1:3000",
-    "https://localhost:3000", 
-    "https://127.0.0.1:3000",
-    "https://dtweetsjnyccweomsrvf.supabase.co",
-]
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
     "https://dtweetsjnyccweomsrvf.supabase.co",
+    "https://app-gestion-casos-vbg-frontend.vercel.app",
+    "https://app-gestion-casos-vbg-frontend-alejandros-projects-0a22a2ff.vercel.app",
+    "https://app-gestion-casos-vbg-f-git-bca302-alejandros-projects-0a22a2ff.vercel.app",
+    "https://app-gestion-casos-vbg-frontend-id41xzawc.vercel.app",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://localhost:3000", 
+    "https://127.0.0.1:3000",
+    "https://dtweetsjnyccweomsrvf.supabase.co",
+    "https://app-gestion-casos-vbg-frontend.vercel.app",
+    "https://app-gestion-casos-vbg-frontend-alejandros-projects-0a22a2ff.vercel.app",
+    "https://app-gestion-casos-vbg-f-git-bca302-alejandros-projects-0a22a2ff.vercel.app",
+    "https://app-gestion-casos-vbg-frontend-id41xzawc.vercel.app",
 ]
 BACKEND_URL = "http://localhost:8000"
 
@@ -74,9 +83,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_+k%u()ao&t4_b#5rre#_igz_ozt$)s7k_k#skfdj#limw%77_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Cambia a False en producción
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'appgestioncasosvbg-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',
+    '192.168.20.58',
+]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -188,8 +203,9 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
         'PORT': os.getenv('DB_PORT', '5432'),
         'OPTIONS': {
             'sslmode': 'require',
+            'connect_timeout': 5,
         },
-        'CONN_MAX_AGE': 600,
+        'CONN_MAX_AGE': 180,
         'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }'''
@@ -204,6 +220,10 @@ DATABASES = {
       'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }   
 }
+
+
+
+
 
 
 
