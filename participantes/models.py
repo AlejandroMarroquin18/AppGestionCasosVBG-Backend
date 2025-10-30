@@ -10,6 +10,7 @@ class Participant(models.Model):
     age = models.IntegerField()
     disability = models.CharField(max_length=100, null=True, blank=True)
     program = models.CharField(max_length=255, null=True, blank=True)  # Nuevo campo para el programa académico / dependencia
+    estamento = models.CharField(max_length=100, null=True, blank=True)  # Nuevo campo para el estamento
     gender_identity = models.CharField(max_length=100, null=True, blank=True)  # Nuevo campo para la identidad de género
     self_recognition = models.CharField(max_length=100, null=True, blank=True)  # Nuevo campo para el auto-reconocimiento
     terms_accepted = models.BooleanField(default=False, null=True, blank=True)  # Aceptación de los términos y condiciones

@@ -14,6 +14,7 @@ from utils.decorators import rol_required
 
 # Listar todos los eventos o crear uno nuevo
 @api_view(['GET', 'POST'])
+@rol_required('admin', 'staff', 'developer')
 def event_list_create(request):
     if request.method == 'GET':
         events = Event.objects.all()
@@ -25,7 +26,7 @@ def event_list_create(request):
         dataCopy = request.data.copy()
         
         # Modificar el campo que necesitas antes de validar
-        dataCopy['status'] = 'Creado'
+        dataCopy['status'] = 'Pendiente'
         
         
         serializer = EventSerializer(data=dataCopy)

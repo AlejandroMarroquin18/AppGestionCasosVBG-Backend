@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 class PersonaReporta(models.Model):
     fecha_recepcion = models.CharField(max_length=30, blank=True)
-    nombre = models.CharField(max_length=30, blank=True)
+    nombre = models.CharField(max_length=100, blank=True)
     sexo = models.CharField(max_length=30, blank=True)
     edad = models.CharField(max_length=30, blank=True)
     estamento = models.CharField(max_length=30, blank=True)
@@ -29,7 +29,7 @@ class PersonaReporta(models.Model):
         return f"{self.nombre} - {self.correo}"
 
 class PersonaAfectada(models.Model):
-    nombre = models.CharField(max_length=30, blank=True)
+    nombre = models.CharField(max_length=100, blank=True)
     sexo = models.CharField(max_length=30, blank=True)
     edad = models.CharField(max_length=30, blank=True)
     tipo_documento_identidad = models.CharField(max_length=30, blank=True)
@@ -39,20 +39,20 @@ class PersonaAfectada(models.Model):
     semestre = models.IntegerField(blank=True, null=True)  
     comuna = models.CharField(max_length=30, blank=True)
     direccion = models.CharField(max_length=100, blank=True, null=True)
-    barrio = models.CharField(max_length=30, blank=True)
-    ciudad_origen = models.CharField(max_length=30, blank=True, null=True)
-    estrato_socioeconomico = models.CharField(max_length=30, blank=True)
-    condicion_etnico_racial = models.CharField(max_length=30, blank=True)
-    tiene_discapacidad = models.CharField(max_length=30, blank=True)
-    tipo_discapacidad = models.CharField(max_length=30, blank=True)
-    identidad_genero = models.CharField(max_length=30, blank=True)
-    orientacion_sexual = models.CharField(max_length=30, blank=True)
-    estamento = models.CharField(max_length=30, blank=True)
-    vicerrectoria_adscrito = models.CharField(max_length=52, blank=True)
-    dependencia = models.CharField(max_length=30, blank=True)
-    programa_academico = models.CharField(max_length=30, blank=True)
-    facultad = models.CharField(max_length=30, blank=True)
-    sede = models.CharField(max_length=30, blank=True)
+    barrio = models.CharField(max_length=50, blank=True)
+    ciudad_origen = models.CharField(max_length=50, blank=True, null=True)
+    estrato_socioeconomico = models.CharField(max_length=3, blank=True)
+    condicion_etnico_racial = models.CharField(max_length=40, blank=True)
+    tiene_discapacidad = models.CharField(max_length=3, blank=True)
+    tipo_discapacidad = models.CharField(max_length=40, blank=True)
+    identidad_genero = models.CharField(max_length=60, blank=True)
+    orientacion_sexual = models.CharField(max_length=60, blank=True)
+    estamento = models.CharField(max_length=100, blank=True)
+    vicerrectoria_adscrito = models.CharField(max_length=100, blank=True)
+    dependencia = models.CharField(max_length=40, blank=True)
+    programa_academico = models.CharField(max_length=200, blank=True)
+    facultad = models.CharField(max_length=100, blank=True)
+    sede = models.CharField(max_length=50, blank=True)
     celular = models.CharField(max_length=30, blank=True)
     correo = models.EmailField(blank=True)
     tipo_vbg_os = models.TextField(blank=True)
@@ -120,7 +120,13 @@ class Queja(models.Model):
     asistencia_juridica = models.CharField(max_length=3, blank=True)
     acompañamiento_solicitud_medidas_proteccion_inicial = models.CharField(max_length=3, blank=True)
     acompañamiento_ante_instancias_gubernamentales = models.CharField(max_length=3, blank=True)
-    interponer_queja_al_comite_asusntos_internos_disciplinarios = models.CharField(max_length=3, blank=True)
+    
+    #interponer_queja_al_comite_asusntos_internos_disciplinarios = models.CharField(max_length=3, blank=True)
+    
+    interponer_queja_al_cade = models.CharField(max_length=3, blank=True)
+    interponer_queja_oficina_control_interno = models.CharField(max_length=3, blank=True)
+    interponer_queja_a_rectoria=models.CharField(max_length=3, blank=True)
+    
     observaciones = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):

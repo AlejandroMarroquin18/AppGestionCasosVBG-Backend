@@ -28,6 +28,7 @@ from utils.decorators import rol_required
 from collections import Counter
 import pandas as pd
 
+
 @api_view(['GET'])
 @rol_required('admin', 'staff', 'developer')
 def lista_quejas(request):
@@ -219,6 +220,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
+@rol_required('admin', 'staff', 'developer')
 def validar_case_id(request, case_id):
     existe = Queja.objects.filter(id=case_id).exists()
     return Response({"exists": existe}, status=status.HTTP_200_OK)
@@ -250,19 +252,24 @@ def statistics(request):
     estudiantes = Queja.objects.filter(persona_afectada__estamento__iexact='Estudiante').count()
     profesores = Queja.objects.filter(persona_afectada__estamento__iexact='Docente').count()
     funcionarios = Queja.objects.filter(persona_afectada__estamento__iexact='Funcionario').count()
+    externos = Queja.objects.filter(persona_afectada__estamento__iexact='Externo').count()
     
     # Remitidos
     remitidosEstudiantes = Queja.objects.filter(
         persona_afectada__estamento__iexact='Estudiante', 
-        estado__iexact='Remitido'
+        estado__iexact='Remisión externa'
     ).count()
     remitidosProfesores = Queja.objects.filter(
         persona_afectada__estamento__iexact='Docente', 
-        estado__iexact='Remitido'
+        estado__iexact='Remisión externa'
     ).count()
     remitidosFuncionarios = Queja.objects.filter(
         persona_afectada__estamento__iexact='Funcionario', 
-        estado__iexact='Remitido'
+        estado__iexact='Remisión externa'
+    ).count()
+    remitidosExternos = Queja.objects.filter(
+        persona_afectada__estamento__iexact='Externo',
+        estado__iexact='Remisión externa'
     ).count()
 
     # Conteo por facultades del afectado
@@ -428,11 +435,12 @@ def statistics(request):
         'afectado_estudiantes': estudiantes,
         'afectado_profesores': profesores,
         'afectado_funcionarios': funcionarios,
+        'afectado_externos': externos,
         
         'remitidos_estudiantes': remitidosEstudiantes,
         'remitidos_profesores': remitidosProfesores,
         'remitidos_funcionarios': remitidosFuncionarios,
-
+        'remitidos_externos': remitidosExternos,
         'conteo_por_facultad_afectado': list(facultades),
         'conteo_por_sede_afectado': list(sedes),
         

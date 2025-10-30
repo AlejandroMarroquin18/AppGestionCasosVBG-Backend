@@ -49,6 +49,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
+    "https://accounts.google.com",
+    "http://192.168.0.13:8000",
+    "http://192.168.0.13",
     "https://dtweetsjnyccweomsrvf.supabase.co",
     "https://app-gestion-casos-vbg-frontend.vercel.app",
     "https://app-gestion-casos-vbg-frontend-alejandros-projects-0a22a2ff.vercel.app",
@@ -61,6 +64,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://localhost:3000", 
     "https://127.0.0.1:3000",
+    "https://accounts.google.com",
     "https://dtweetsjnyccweomsrvf.supabase.co",
     "https://app-gestion-casos-vbg-frontend.vercel.app",
     "https://app-gestion-casos-vbg-frontend-alejandros-projects-0a22a2ff.vercel.app",
@@ -91,6 +95,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '.onrender.com',
     '192.168.20.58',
+    "192.168.0.6",
+    "192.168.0.13:8000",
+    "192.168.0.13",
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
