@@ -22,17 +22,19 @@ def event_list_create(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-
-        dataCopy = request.data.copy()
+        
+        dataCopy = request.data
         
         # Modificar el campo que necesitas antes de validar
         dataCopy['status'] = 'Pendiente'
         
         
         serializer = EventSerializer(data=dataCopy)
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Obtener, actualizar o eliminar un evento por ID

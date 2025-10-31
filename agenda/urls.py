@@ -6,6 +6,4 @@ urlpatterns = [
     path('', views.event_list_create, name='event-list-create'),     # GET (lista) y POST (crear)
     path('<int:pk>/', views.event_detail, name='event-detail'),      # GET, PUT, DELETE por ID
     path('stats/', views.eventos_stats, name='event-stats'),          # Estadísticas de eventos
-
-
 ]

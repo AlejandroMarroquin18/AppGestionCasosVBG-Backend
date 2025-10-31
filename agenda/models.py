@@ -1,5 +1,6 @@
 from django.db import models
-
+from quejas.models import Queja
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
 class Event(models.Model):
@@ -7,7 +8,7 @@ class Event(models.Model):
     description=models.CharField(blank=True)#Descripcion
     status=models.CharField(default='Creado', blank=True)#Cancelado, aplazado y tales
     location=models.CharField(max_length=255, blank=True)#lugar
-    attendes=models.CharField(blank=True,null=True)#asistentes, correos electronicos preferiblemente
+    attendes = ArrayField(models.EmailField(), blank=True, default=list, null=True)#asistentes, correos electronicos preferiblemente
     color= models.CharField(max_length=8,blank=True,null=True)#Colores
     organizer=models.CharField(max_length=255, blank=True, null=True)#organizador de la reunion, quien lo hace
 

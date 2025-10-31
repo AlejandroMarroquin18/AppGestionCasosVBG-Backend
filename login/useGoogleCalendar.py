@@ -8,6 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes
 from login.helpers import obtener_usuario_de_request
 from agenda.models import Event
+from agenda.serializers import EventSerializer
 
 API_URL = "https://www.googleapis.com/calendar/v3"
 
@@ -285,22 +286,37 @@ def create_event(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
-    event_data = request.data
+    google_event_data = request.data
+    event_data = request.data.copy()
+
+    backendEvent = event_data.pop("backendEvent", {})
+    print(backendEvent)
+    #del event_data["backendEvent"]
+
     try:
         resp = requests.post(
             f"{API_URL}/calendars/primary/events?conferenceDataVersion=1",
             headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
-            json=event_data
+            json=google_event_data
         )
         data = resp.json()
         
         if not resp.ok:
             return Response({"error": data.get('error', {}).get('message', 'Unknown error')}, status=resp.status_code)
 
+        backendEvent["google_event_id"] = data.get("id")
+        backendEvent["meet_link"] = data.get("hangoutLink", "")
+
         
-            
+        serializer = EventSerializer(data=backendEvent)
         
-        event = Event.objects.create(
+        if serializer.is_valid():
+            print("Serializer válido")
+            serializer.save()
+        print(serializer.errors)
+        
+        
+        '''event = Event.objects.create(
             title=data.get("summary", ""),
             description=data.get("description", ""),
             status=data.get("status", "Creado"),
@@ -316,11 +332,11 @@ def create_event(request):
             create_meet="hangoutLink" in data,
             meet_link=data.get("hangoutLink"),
             google_event_id=data.get("id")
-        )
+        )'''
         return Response(data, status=status.HTTP_201_CREATED)
         
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
