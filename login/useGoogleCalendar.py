@@ -366,7 +366,7 @@ def update_event(request, eventId):
             event.title = data.get("summary", event.title)
             event.description = data.get("description", event.description)
             event.location = data.get("location", event.location)
-            event.attendes = ",".join([att["email"] for att in data.get("attendees", [])]) if "attendees" in data else event.attendes
+            event.attendes = [att["email"] for att in data.get("attendees", [])] if "attendees" in data else event.attendes
             event.color = data.get("colorId", event.color)
             event.startdatehour = data["start"].get("dateTime", event.startdatehour)
             event.enddatehour = data["end"].get("dateTime", event.enddatehour)
@@ -379,6 +379,7 @@ def update_event(request, eventId):
         return Response(data, status=status.HTTP_200_OK)
         
     except Exception as e:
+        print(e)
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
