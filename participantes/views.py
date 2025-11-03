@@ -6,8 +6,14 @@ from .models import Participant
 from .serializers import ParticipantSerializer
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
+
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def register_participant(request, workshop_id):
     print("=== DATOS RECIBIDOS EN BACKEND ===")
     print("Workshop ID:", workshop_id)

@@ -39,6 +39,7 @@ def event_list_create(request):
 
 # Obtener, actualizar o eliminar un evento por ID
 @api_view(['GET', 'PUT', 'DELETE'])
+@rol_required('admin', 'staff', 'developer')
 def event_detail(request, pk):
     try:
         event = Event.objects.get(google_event_id=pk)

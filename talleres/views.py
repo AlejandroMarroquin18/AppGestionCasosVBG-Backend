@@ -140,6 +140,9 @@ def statistics(request):
         # Estadísticas por discapacidad
         disability_stats = list(Participant.objects.values('disability').annotate(count=Count('id')))
 
+        #sede
+        sede_stats = list(Workshop.objects.values('sede').annotate(count=Count('id')))
+
         # Si quieres agregar más (por ejemplo, por rango de edad o autorreconocimiento)
         # self_recognition_stats = list(Participant.objects.values('self_recognition').annotate(count=Count('id')))
 
@@ -152,7 +155,7 @@ def statistics(request):
             'gender_stats': gender_stats,
             'program_stats': program_stats,
             'disability_stats': disability_stats,
-            # 'self_recognition_stats': self_recognition_stats,
+            'sede_stats': sede_stats,
         }
 
         return Response(data)

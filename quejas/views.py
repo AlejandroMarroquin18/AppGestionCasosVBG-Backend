@@ -50,7 +50,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
 
         if user.rol == "visitor":
             queryset = queryset.filter(
-                Q(persona_afectada__correo=user.email) | 
+                #Q(persona_afectada__correo=user.email) | 
                 Q(persona_reporta__correo=user.email)
             )
 
@@ -192,12 +192,10 @@ class QuejaViewSet(viewsets.ModelViewSet):
         destinatarios = []
 
         # Solo agregar afectado_correo si existe y no es None
-        if afectado_correo:
-            destinatarios.append(afectado_correo)
         
         # Solo agregar reporta_correo si existe y no es None
-        if reporta_correo:
-            destinatarios.append(reporta_correo)
+        '''if reporta_correo:
+            destinatarios.append(reporta_correo)'''
 
         # Asegurar que haya destinatarios válidos
         if destinatarios:

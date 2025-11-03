@@ -383,36 +383,7 @@ def android_auth(request):
     except Exception as e:
         return Response({"error": "Error en autenticación con Google.", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-''' produccion
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])##produccion
-def check_session(request):
-    print("=== CHECK SESSION DEBUG ===")
-    print("Request.user:", request.user)
-    print("Request.user.is_authenticated:", request.user.is_authenticated)
-    print("Cookies recibidas:", dict(request.COOKIES))
-    print("Session key recibida:", request.session.session_key)
-    print("Session data:", dict(request.session))
-    print("User ID en sesión:", request.session.get('_auth_user_id'))
-    
-    if not request.user.is_authenticated:
-        return Response({
-            "error": "Usuario no autenticado", 
-            "debug": {
-                "cookies": dict(request.COOKIES),
-                "session_key": request.session.session_key
-            }
-        }, status=401)
-    
-    user = request.user
-    
-    return Response({
-        "is_authenticated": True,
-        "user": {
-            "email": user.email,
-            "nombre": user.nombre,
-        }
-    })'''
+
 
 
 
@@ -421,16 +392,6 @@ def check_session(request):
 @permission_classes([IsAuthenticated])
 def check_session(request):
     try:
-        '''authorization_header = request.headers.get('Authorization')
-
-         
-        if not authorization_header.startswith('Bearer '):
-            return Response({
-                'error': 'Header Authorization requerido con formato: Bearer <token>'
-            }, status=400)
-        
-        # Extraer el token
-        token_string = authorization_header.split(' ')[1]'''
         
         # Identificar usuario manualmente
         #user = identificar_usuario_por_token_string(token_string)
