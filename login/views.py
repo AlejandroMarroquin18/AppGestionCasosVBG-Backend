@@ -43,7 +43,7 @@ def login_view(request):
     serializer = UserSerializer(instance=user)
     #login(request, user)  # Iniciar sesión en Django
     
-    return Response({"token":token.key,"user": serializer.data},status.HTTP_200_OK)
+    return Response({"token":token.key,"user": serializer.data,"rol":serializer.rol},status.HTTP_200_OK)
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -225,7 +225,7 @@ def googleAuth(request):
         token, _ = Token.objects.get_or_create(user=user)
         response = Response({
             "token": token.key,
-            "user": {"email": user.email, "nombre": user.nombre},
+            "user": {"email": user.email, "nombre": user.nombre, "rol":user.rol},
             "is_new_user": created
         }, status=status.HTTP_200_OK)
         
