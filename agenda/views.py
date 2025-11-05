@@ -64,41 +64,45 @@ def event_detail(request, pk):
 @api_view(['GET'])
 @rol_required('admin', 'staff', 'developer')
 def eventos_stats(request):
-    # Totales por status
+
     total_creados = Event.objects.filter(status="Creado").count()
     total_realizados = Event.objects.filter(status="Realizada").count()
 
-    # Relación Event -> Queja por case_id
     eventos_con_queja = Event.objects.filter(case_id__isnull=False)
 
-    # Filtrar y contar por estamento
     total_estudiantes = eventos_con_queja.filter(
-        case_id__in=Queja.objects.filter(afectado_estamento="Estudiante").values_list('id', flat=True)
+        case_id__persona_afectada__estamento="Estudiante"
     ).count()
 
     total_funcionarios = eventos_con_queja.filter(
-        case_id__in=Queja.objects.filter(afectado_estamento="Funcionario").values_list('id', flat=True)
+        case_id__persona_afectada__estamento="Funcionario"
     ).count()
 
     total_profesores = eventos_con_queja.filter(
-        case_id__in=Queja.objects.filter(afectado_estamento="Docente").values_list('id', flat=True)
+        case_id__persona_afectada__estamento="Docente"
     ).count()
 
-    # Clasificación por facultad
-    facultades =  Event.objects.values("case_id__afectado_facultad").annotate(
-        total_eventos=Count("id")
-    ).order_by("case_id__afectado_facultad")
+    facultades = (
+        Event.objects
+        .values("case_id__persona_afectada__facultad")
+        .annotate(total_eventos=Count("id"))
+        .order_by("case_id__persona_afectada__facultad")
+    )
 
-    generos = Event.objects.values("case_id__afectado_identidad_genero").annotate(
-        total=Count("id")
-    ).order_by("case_id__afectado_identidad_genero")
+    generos = (
+        Event.objects
+        .values("case_id__persona_afectada__identidad_genero")
+        .annotate(total=Count("id"))
+        .order_by("case_id__persona_afectada__identidad_genero")
+    )
+
     tipo = (
         Event.objects
         .values('type')
         .annotate(total=Count('id'))
         .order_by('-total')
     )
-    # 1. Conteo por AÑOS
+
     anios = (
         Event.objects
         .annotate(year=ExtractYear("startdatehour"))
@@ -107,20 +111,22 @@ def eventos_stats(request):
         .order_by("year")
     )
 
-    # 2. Último año disponible
-    last_year = Event.objects.annotate(year=ExtractYear("startdatehour")).aggregate(
+    last_year = Event.objects.annotate(
+        year=ExtractYear("startdatehour")
+    ).aggregate(
         max_year=Max("year")
     )["max_year"]
 
-    # 3. Conteo por MESES del último año
-    meses = (
-        Event.objects
-        .filter(startdatehour__year=last_year)
-        .annotate(month=ExtractMonth("startdatehour"))
-        .values("month")
-        .annotate(total=Count("id"))
-        .order_by("month")
-    )
+    meses = []
+    if last_year:
+        meses = (
+            Event.objects
+            .filter(startdatehour__year=last_year)
+            .annotate(month=ExtractMonth("startdatehour"))
+            .values("month")
+            .annotate(total=Count("id"))
+            .order_by("month")
+        )
 
     return JsonResponse({
         "total_eventos_creados": total_creados,
@@ -133,5 +139,4 @@ def eventos_stats(request):
         "conteo_por_tipo": list(tipo),
         "conteo_por_anio": list(anios),
         "conteo_por_mes": list(meses)
-
-    }) 
+    })
