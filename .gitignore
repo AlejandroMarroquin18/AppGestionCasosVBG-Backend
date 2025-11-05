@@ -14,3 +14,4 @@ comandos.txt
 __pycache__/
 cert.crt
 cert.key
+/venv/
