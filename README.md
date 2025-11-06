@@ -30,7 +30,7 @@ Herramientas y requisitos previos:
 - Todas las librerías y versiones que se encuentran en el archivo requirements.txt
 - Cuenta de correo electronico con una contraseña de aplicación habilitada para el envío de correos
 - Cuenta de Google Cloud Console con una credencial de cliente Web, una de cliente de Android y la API de Google 
-    Calendar habilitada con los siguientes scopes solicitado
+    Calendar habilitada con los siguientes scopes solicitados
     https://www.googleapis.com/auth/calendar
     https://www.googleapis.com/auth/calendar.events
 -
@@ -55,6 +55,7 @@ se deben establecer la ips desde las cuales la aplicación podrá recibir petici
 - GOOGLE_REDIRECT_URI
 - CORS_ALLOWED_ORIGINS
 - CSRF_TRUSTED_ORIGINS
+
 ##Paso a paso de inicialización del servidor:
 1. Creacion del entorno virtual 
 ```bash
