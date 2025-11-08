@@ -100,6 +100,8 @@ ALLOWED_HOSTS = [
     "192.168.0.13",
     "192.168.0.12",
     "192.168.0.7",
+    "192.168.0.4",
+    "192.168.0.2"
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
