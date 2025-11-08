@@ -204,7 +204,7 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-'''DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'postgres'),
@@ -219,9 +219,9 @@ WSGI_APPLICATION = 'appvbgbackend.wsgi.application'
         'CONN_MAX_AGE': 180,
         'DISABLE_SERVER_SIDE_CURSORS': True,
     }
-}'''
+}
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
        'NAME': 'vbgdb',  # Nombre de tu base de datos
@@ -230,7 +230,7 @@ DATABASES = {
        'HOST': 'localhost',                  # Si está en el mismo equipo
       'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }   
-}
+}'''
 
 
 
